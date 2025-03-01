@@ -38,7 +38,7 @@ function Registration() {
   const [items, setItems] = useState([]); // Stores the list of attendees
   const [selectedKey, setSelectedKey] = useState(null); // Tracks the selected row
   const [page, setPage] = useState(1); // Current page for pagination
-  const rowsPerPage = 8; // Set rows per page
+  const rowsPerPage = 6; // Set rows per page
   const pages = Math.ceil(items.length / rowsPerPage); // Calculate total pages
 
   // State for modal form inputs
@@ -251,27 +251,7 @@ function Registration() {
 
       <hr className="m-2 border-2 border-gray-300 " />
 
-        {/* Export Controls */}
-        <div className="export-controls flex flex-wrap gap-4 my-4 mx-3">
-        <Input
-          type="date"
-          label="Filter by Date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-        />
-
-        <Input
-          type="text"
-          label="Filter by Department"
-          placeholder="Enter department"
-          value={filterDepartment}
-          onChange={(e) => setFilterDepartment(e.target.value)}
-        />
-
-        <Button onPress={exportToExcel} color="secondary">
-          Export as Excel
-        </Button>
-      </div>
+   
 
       {/* Search Bar and Check-In Button */}
       <div
@@ -467,7 +447,7 @@ function Registration() {
           </div>
         }
         classNames={{
-          wrapper: "h-[593px]",
+          wrapper: "h-[30.75rem]",
         }}
       >
         <TableHeader>
@@ -513,7 +493,7 @@ function Registration() {
       key={item.AttendeeID}
       data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
       onClick={() => setSelectedKey(item.AttendeeID)}
-      style={{ height: "40px" }}
+      style={{ height: "0.5rem" }}
       className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
     >
       {(columnKey) => (
@@ -542,6 +522,32 @@ function Registration() {
 
 
       </Table>
+
+{/* Export Controls */}
+<div className="export-controls mb-4">
+  <h2 className="mb-2 ">Export file</h2>
+  <div className="flex items-center gap-4">
+    <Input
+      type="date"
+      label="Filter by Date"
+      value={filterDate}
+      onChange={(e) => setFilterDate(e.target.value)}
+      className="max-w-xs h-10"  // Force input height
+    />
+    <Input
+      type="text"
+      label="Filter by Department"
+      placeholder="Enter department"
+      value={filterDepartment}
+      onChange={(e) => setFilterDepartment(e.target.value)}
+      className="max-w-xs h-10"  // Force input height
+    />
+    <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
+      Export as Excel
+    </Button>
+  </div>
+</div>
+
     </div>
   );
 }

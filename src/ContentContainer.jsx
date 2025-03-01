@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Body from "./components/Body";
@@ -30,9 +29,24 @@ function Main() {
   };
 
   return (
-    <div className="main-container">
-      <Sidebar onSelectPage={setSelectedPage} />
-      <Body>{renderSelectedPage()}</Body>
+    <div className="main-container h-screen flex flex-col sm:flex-row overflow-hidden">
+      <Sidebar onSelectPage={setSelectedPage} className="h-full" />
+      <Body className="h-full flex-1">
+        <div
+          style={{
+            backgroundColor: "#fcf8f0",
+            borderRadius: "50px",
+            margin: "20px auto",
+            width: "100%",
+            height: "100%",
+            padding: "20px",
+            paddingTop:'0px',
+            boxSizing: "border-box",
+          }}
+        >
+          {renderSelectedPage()}
+        </div>
+      </Body>
     </div>
   );
 }

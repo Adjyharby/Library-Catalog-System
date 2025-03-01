@@ -5,7 +5,7 @@ const RecommendationCard = ({ book, onOpen }) => {
   return (
     <Button
       onPress={() => onOpen(book)}
-      className="flex flex-row items-center bg-gray-100 p-20 rounded-lg shadow-lg"
+      className="flex flex-row items-center bg-gray-100 p-16 rounded-lg shadow-lg"
     >
       <div>
         <Image

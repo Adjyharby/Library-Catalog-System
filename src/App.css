@@ -1,7 +1,7 @@
 .main-container {
     display: flex;
     width: 100%;
-    height: 850px;
+    height: 100%;
   }
   
   .sidebar {
@@ -147,16 +147,18 @@
     }
     /*end of libarry logo design*/
 
-  
-  .body {
-    flex-grow: 1;
-    padding: 20px;
-    background-color: #fcf8f0;
-    /* height: 100%; */
-    height: 820px;
-    margin: 20px;
-    border-radius: 50px;
-  }
+    .body {
+      flex-grow: 1;
+      padding: 20px;
+      background-color: #fcf8f0;
+      /* Instead of a fixed max-height, use a height relative to the viewport */
+      height: calc(100vh - 40px); /* Adjust the subtraction value to account for margins, header, etc. */
+      margin: 20px;
+      border-radius: 50px;
+      /* Optionally, allow content to shrink if needed */
+      overflow: hidden;
+    }
+    
 
 
 body, html {
