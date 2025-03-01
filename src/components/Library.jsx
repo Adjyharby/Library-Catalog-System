@@ -152,7 +152,7 @@ function Library() {
                                 className="mr-4"
                               />
                               <div>
-                                <h4 className="text-lg font-bold">{book.title}</h4>
+                                <h4 className="text-lg font-bold z-90">{book.title}</h4>
                                 <p className="text-sm">{book.author_name?.join(", ")}</p>
                               </div>
                             </CardHeader>
