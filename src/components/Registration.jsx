@@ -8,6 +8,9 @@ import {
   Button,
   useDisclosure,
   Tooltip,
+  Input, // Imported Input is already present so reused here
+  DateInput,
+
 } from "@nextui-org/react";
 import {
   Table,
@@ -23,11 +26,12 @@ import { CalendarIcon } from "./ui/CalendarIcon";
 import { TimeInput } from "@nextui-org/react";
 import { ClockCircleLinearIcon } from "./ui/ClockCircleLinearIcon";
 import { Time } from "@internationalized/date";
-import { Input } from "@nextui-org/react";
-import { DateInput } from "@nextui-org/react";
 import "./reg.css";
 import DateDisplay from "./DateDisplay.jsx";
 import Clock from "./Clock.jsx";
+
+// for exporting functionality
+import * as XLSX from "xlsx";
 
 function Registration() {
   // State to hold the fetched data
@@ -46,6 +50,24 @@ function Registration() {
   const [purpose, setPurpose] = useState("");
   const [eventDate, setEventDate] = useState(new CalendarDate(2024, 4, 4)); // Default date
   const [eventTime, setEventTime] = useState(new Time(11, 45)); // Default time
+
+  // ===========================
+  // Export Filter States
+  const [filterDate, setFilterDate] = useState("");
+  const [filterDepartment, setFilterDepartment] = useState("");
+
+  // Compute filtered items based on export filters.
+  // (For exporting we use the complete list of items; adjust filters as needed)
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchDate = filterDate ? item.Date === filterDate : true;
+      const matchDept = filterDepartment
+        ? item.Dept.toLowerCase().includes(filterDepartment.toLowerCase())
+        : true;
+      return matchDate && matchDept;
+    });
+  }, [items, filterDate, filterDepartment]);
+  // ===========================
 
   // Fetch data from API
   const fetchData = async () => {
@@ -91,10 +113,10 @@ function Registration() {
     const now = new Date();
 
     setEventDate(new CalendarDate(now.getFullYear(), now.getMonth(), now.getDate()));
-  setEventTime(new Time(now.getHours(), now.getMinutes()));
+    setEventTime(new Time(now.getHours(), now.getMinutes()));
 
-  setBackdrop(backdrop);
-  onOpen(); // Open the modal
+    setBackdrop(backdrop);
+    onOpen(); // Open the modal
   };
 
   // Handle timeout submission
@@ -132,7 +154,7 @@ function Registration() {
     }
   };
 
-  
+
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -143,8 +165,8 @@ function Registration() {
     const currentDate = new Date(now.setDate(now.getDate() + 1)).toISOString().split("T")[0];
     
     console.log("Tomorrow's Date:", currentDate);
-    
-    
+
+
 
     if (!isFormValid) return;
 
@@ -198,7 +220,17 @@ function Registration() {
       purpose.trim() !== ""
     );
   }, [name, age, gender, yearLevel, course, purpose]);
+
+  // ===========================
+  // Export function
   
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredItems);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+    XLSX.writeFile(workbook, "attendance.xlsx");
+  };
+  // ===========================
 
   return (
     <div className="p-2">
@@ -218,6 +250,28 @@ function Registration() {
       </div>
 
       <hr className="m-2 border-2 border-gray-300 " />
+
+      {/* Export Controls */}
+      <div className="export-controls flex flex-wrap gap-4 my-4 mx-3">
+        <Input
+          type="date"
+          label="Filter by Date"
+          value={filterDate}
+          onChange={(e) => setFilterDate(e.target.value)}
+        />
+
+        <Input
+          type="text"
+          label="Filter by Department"
+          placeholder="Enter department"
+          value={filterDepartment}
+          onChange={(e) => setFilterDepartment(e.target.value)}
+        />
+
+        <Button onPress={exportToExcel} color="secondary">
+          Export as Excel
+        </Button>
+      </div>
 
       {/* Search Bar and Check-In Button */}
       <div
@@ -267,32 +321,32 @@ function Registration() {
               </ModalHeader>
               <ModalBody className="space-y-6">
                 {/* Date and Time Section */}
-        <div>
-          <h2 className="text-lg font-medium mb-2">Date and Time</h2>
-          <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-            <DateInput
-              label="Date"
-              value={eventDate}
-              onChange={setEventDate}
-              placeholderValue={new CalendarDate(1995, 11, 6)}
-              labelPlacement="outside"
-              className="w-full md:w-1/2"
-              endContent={
-                <CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
-            />
-            <TimeInput
-              label="Event Time"
-              value={eventTime}
-              onChange={setEventTime}
-              labelPlacement="outside"
-              className="w-full md:w-1/2"
-              endContent={
-                <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
-            />
-          </div>
-        </div>
+                <div>
+                  <h2 className="text-lg font-medium mb-2">Date and Time</h2>
+                  <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
+                    <DateInput
+                      label="Date"
+                      value={eventDate}
+                      onChange={setEventDate}
+                      placeholderValue={new CalendarDate(1995, 11, 6)}
+                      labelPlacement="outside"
+                      className="w-full md:w-1/2"
+                      endContent={
+                        <CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                      }
+                    />
+                    <TimeInput
+                      label="Event Time"
+                      value={eventTime}
+                      onChange={setEventTime}
+                      labelPlacement="outside"
+                      className="w-full md:w-1/2"
+                      endContent={
+                        <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
+                      }
+                    />
+                  </div>
+                </div>
 
                 <hr
                   className="border-2 border-gray-300"
@@ -454,38 +508,39 @@ function Registration() {
           </TableColumn>
         </TableHeader>
         <TableBody items={paginatedItems}>
-  {(item) => (
-    <TableRow
-      key={item.AttendeeID}
-      data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
-      onClick={() => setSelectedKey(item.AttendeeID)}
-      style={{ height: "40px" }}
-      className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
-    >
-      {(columnKey) => (
-        <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
-          {columnKey === "TimeOut" ? (
-            item.TimeOut === '00:00:00' || item.TimeOut == null ? ( // Check if TimeOut is '00:00:00' or null
-              <button
-                className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
-                style={{ marginTop: "-20px" }}
-                onClick={() => handleTimeout(item.AttendeeID)} // Send the current row's ID to handleTimeout
-              >
-                Time Out
-              </button>
-            ) : (
-              item.TimeOut // Display the TimeOut value if it's available
-            )
-          ) : (
-            item[columnKey] // For other columns, just display the value
+          {(item) => (
+            <TableRow
+              key={item.AttendeeID}
+              data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
+              onClick={() => setSelectedKey(item.AttendeeID)}
+              style={{ height: "40px" }}
+              className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
+            >
+              {(columnKey) => (
+                <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
+                  {columnKey === "TimeOut" ? (
+                    item.TimeOut === "00:00:00" || item.TimeOut == null ? (
+                      // Check if TimeOut is '00:00:00' or null
+                      <button
+                        className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
+                        style={{ marginTop: "-20px" }}
+                        onClick={() => handleTimeout(item.AttendeeID)} // Send the current row's ID to handleTimeout
+                      >
+                        Time Out
+                      </button>
+                    ) : (
+                      item.TimeOut // Display the TimeOut value if it's available
+                    )
+                  ) : (
+                    item[columnKey] // For other columns, just display the value
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
           )}
-        </TableCell>
-      )}
-    </TableRow>
-  )}
-</TableBody>
+        </TableBody>
 
-
+        
       </Table>
     </div>
   );
