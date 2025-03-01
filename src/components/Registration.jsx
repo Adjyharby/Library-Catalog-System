@@ -8,7 +8,7 @@ import {
   Button,
   useDisclosure,
   Tooltip,
-  Input, // Imported Input is already present so reused here
+  Input,
   DateInput,
 
 } from "@nextui-org/react";
@@ -113,10 +113,10 @@ function Registration() {
     const now = new Date();
 
     setEventDate(new CalendarDate(now.getFullYear(), now.getMonth(), now.getDate()));
-    setEventTime(new Time(now.getHours(), now.getMinutes()));
+  setEventTime(new Time(now.getHours(), now.getMinutes()));
 
-    setBackdrop(backdrop);
-    onOpen(); // Open the modal
+  setBackdrop(backdrop);
+  onOpen(); // Open the modal
   };
 
   // Handle timeout submission
@@ -154,7 +154,7 @@ function Registration() {
     }
   };
 
-
+  
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -165,8 +165,8 @@ function Registration() {
     const currentDate = new Date(now.setDate(now.getDate() + 1)).toISOString().split("T")[0];
     
     console.log("Tomorrow's Date:", currentDate);
-
-
+    
+    
 
     if (!isFormValid) return;
 
@@ -221,7 +221,7 @@ function Registration() {
     );
   }, [name, age, gender, yearLevel, course, purpose]);
 
-  // ===========================
+   // ===========================
   // Export function
   
   const exportToExcel = () => {
@@ -251,8 +251,8 @@ function Registration() {
 
       <hr className="m-2 border-2 border-gray-300 " />
 
-      {/* Export Controls */}
-      <div className="export-controls flex flex-wrap gap-4 my-4 mx-3">
+        {/* Export Controls */}
+        <div className="export-controls flex flex-wrap gap-4 my-4 mx-3">
         <Input
           type="date"
           label="Filter by Date"
@@ -321,32 +321,32 @@ function Registration() {
               </ModalHeader>
               <ModalBody className="space-y-6">
                 {/* Date and Time Section */}
-                <div>
-                  <h2 className="text-lg font-medium mb-2">Date and Time</h2>
-                  <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-                    <DateInput
-                      label="Date"
-                      value={eventDate}
-                      onChange={setEventDate}
-                      placeholderValue={new CalendarDate(1995, 11, 6)}
-                      labelPlacement="outside"
-                      className="w-full md:w-1/2"
-                      endContent={
-                        <CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                      }
-                    />
-                    <TimeInput
-                      label="Event Time"
-                      value={eventTime}
-                      onChange={setEventTime}
-                      labelPlacement="outside"
-                      className="w-full md:w-1/2"
-                      endContent={
-                        <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
-                      }
-                    />
-                  </div>
-                </div>
+        <div>
+          <h2 className="text-lg font-medium mb-2">Date and Time</h2>
+          <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
+            <DateInput
+              label="Date"
+              value={eventDate}
+              onChange={setEventDate}
+              placeholderValue={new CalendarDate(1995, 11, 6)}
+              labelPlacement="outside"
+              className="w-full md:w-1/2"
+              endContent={
+                <CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+              }
+            />
+            <TimeInput
+              label="Event Time"
+              value={eventTime}
+              onChange={setEventTime}
+              labelPlacement="outside"
+              className="w-full md:w-1/2"
+              endContent={
+                <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
+              }
+            />
+          </div>
+        </div>
 
                 <hr
                   className="border-2 border-gray-300"
@@ -508,39 +508,39 @@ function Registration() {
           </TableColumn>
         </TableHeader>
         <TableBody items={paginatedItems}>
-          {(item) => (
-            <TableRow
-              key={item.AttendeeID}
-              data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
-              onClick={() => setSelectedKey(item.AttendeeID)}
-              style={{ height: "40px" }}
-              className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
-            >
-              {(columnKey) => (
-                <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
-                  {columnKey === "TimeOut" ? (
+  {(item) => (
+    <TableRow
+      key={item.AttendeeID}
+      data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
+      onClick={() => setSelectedKey(item.AttendeeID)}
+      style={{ height: "40px" }}
+      className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
+    >
+      {(columnKey) => (
+        <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
+          {columnKey === "TimeOut" ? (
                     item.TimeOut === "00:00:00" || item.TimeOut == null ? (
                       // Check if TimeOut is '00:00:00' or null
-                      <button
-                        className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
-                        style={{ marginTop: "-20px" }}
-                        onClick={() => handleTimeout(item.AttendeeID)} // Send the current row's ID to handleTimeout
-                      >
-                        Time Out
-                      </button>
-                    ) : (
-                      item.TimeOut // Display the TimeOut value if it's available
-                    )
-                  ) : (
-                    item[columnKey] // For other columns, just display the value
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
+              <button
+                className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
+                style={{ marginTop: "-20px" }}
+                onClick={() => handleTimeout(item.AttendeeID)} // Send the current row's ID to handleTimeout
+              >
+                Time Out
+              </button>
+            ) : (
+              item.TimeOut // Display the TimeOut value if it's available
+            )
+          ) : (
+            item[columnKey] // For other columns, just display the value
           )}
-        </TableBody>
+        </TableCell>
+      )}
+    </TableRow>
+  )}
+</TableBody>
 
-        
+
       </Table>
     </div>
   );
