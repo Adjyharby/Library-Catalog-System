@@ -11,27 +11,26 @@ const RecommendationCard = ({ book, onOpen }) => {
         <Image
           src={book.img}
           alt="Book cover"
-          className="rounded-lg object-cover min-w-20"
+          className="rounded-lg object-contain min-w-20"
           width={120}
           height={120}
         />
       </div>
-      <div className="text-center space-y-1 mt-2 ml-[2rem] " style={{textAlign:'center'}}>
-        <h3 className="font-semibold text-gray-900 mb-2" style={{fontSize:'0.75rem', textWrap:'balance', width:'7rem'}}>{book.title}</h3>
+      <div className="flex flex-col items-center justify-center ml-[2rem] w-28">
+        <h3 className="font-semibold text-gray-900 mb-2 text-sm">
+          {book.title}
+        </h3>
         <p className="text-xs text-gray-600">{book.author}</p>
-        <div style={{textAlign:'center', width:'7rem'}} className="flex h-5 items-center space-x-4 text-small">
+        <div className="flex items-center justify-center space-x-2 text-small mt-1 w-full">
           <Divider orientation="vertical" />
           <div>{book.genre}</div>
           <Divider orientation="vertical" />
-          {/* <div>Docs</div>
-          <div>Source</div> */}
         </div>
       </div>
     </Button>
   );
 };
 
-// Prop validation
 RecommendationCard.propTypes = {
   book: PropTypes.shape({
     img: PropTypes.string.isRequired,

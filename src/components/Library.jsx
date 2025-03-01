@@ -33,10 +33,10 @@ function Library() {
     handleFetchBookName(); // Fetch initial recommendations on component mount
   }, []);
 
-  // Fetch multiple random books for recommendations
+  // Fetch exactly 8 random books for recommendations
   const handleFetchBookName = () => {
     const fetchMultipleBooks = async () => {
-      const promises = Array.from({ length: 4 }, () => {
+      const promises = Array.from({ length: 8 }, () => {
         const randomId = Math.floor(Math.random() * 24) + 1;
         return fetch(`http://localhost/API/Catalog.php?CatalogID=${randomId}`)
           .then((response) => {
@@ -58,13 +58,15 @@ function Library() {
           author: book["AuthorName"] || "Unknown Author",
           genre: book["Genre"] || "Uncategorized",
           description: book["ShortDesc"] || "No description available.",
-          img: `prof${Math.floor(Math.random() * 4) + 2}.jpg`,
+          // Use the ImageDir column if available; otherwise use a placeholder.
+          img:
+            book["ImageDir"] && book["ImageDir"].trim() !== ""
+              ? book["ImageDir"]
+              : "placeholder.jpg",
         }));
 
-      setRecommendations((prevRecommendations) => [
-        ...prevRecommendations,
-        ...validBooks,
-      ]);
+      // Set recommendations to exactly these 8 books
+      setRecommendations(validBooks);
     };
 
     fetchMultipleBooks();
@@ -78,7 +80,6 @@ function Library() {
       const response = await axios.get(
         `http://localhost/API/Catalog.php?q=${encodeURIComponent(searchQuery)}`
       );
-      // Log the response to inspect the data structure if needed
       console.log("Search response:", response.data);
       setSearchResults(response.data || []);
     } catch (error) {
@@ -88,16 +89,18 @@ function Library() {
     }
   };
 
+  // Open modal with a book's details.
+  const openBookModal = (book) => {
+    console.log("Book modal opened with:", book);
+    setSelectedBook(book);
+    setBookOpen(true);
+  };
+
   const handleModalOpen = () => {
     setRegistrationOpen(true);
     setTimeout(() => {
       searchInputRef.current?.focus();
     }, 100);
-  };
-
-  const openBookModal = (book) => {
-    setSelectedBook(book);
-    setBookOpen(true);
   };
 
   return (
@@ -124,7 +127,7 @@ function Library() {
               <>
                 <ModalHeader>Search for Books</ModalHeader>
                 <ModalBody>
-                  <div>
+                  <div className="w-full px-4">
                     <Input
                       ref={searchInputRef}
                       classNames={{
@@ -155,23 +158,52 @@ function Library() {
                       Search
                     </Button>
 
-                    <div className="mt-4">
+                    <div className="mt-4 w-full">
                       {searchResults.length > 0 ? (
                         searchResults.map((book, index) => (
-                          <Card key={book.CatalogID || index} className="mb-4">
-                            <CardHeader>
+                          <Card
+                            key={book.CatalogID || index}
+                            className="w-full mb-4"
+                            isPressable
+                            onPress={() =>
+                              openBookModal({
+                                title: book["Book Name"],
+                                author: book.AuthorName,
+                                genre: book.Genre,
+                                description:
+                                  book["ShortDesc"] ||
+                                  "No description available.",
+                                img:
+                                  book["ImageDir"] &&
+                                  book["ImageDir"].trim() !== ""
+                                    ? book["ImageDir"]
+                                    : "placeholder.jpg",
+                              })
+                            }
+                          >
+                            <CardHeader className="flex flex-row items-center justify-start w-full">
                               <Image
-                                src={"placeholder.jpg"}
+                                src={
+                                  book["ImageDir"] &&
+                                  book["ImageDir"].trim() !== ""
+                                    ? book["ImageDir"]
+                                    : "placeholder.jpg"
+                                }
                                 alt={book["Book Name"]}
-                                width={50}
+                                width={75}
                                 height={75}
-                                className="mr-4"
+                                className="object-contain"
                               />
-                              <div>
-                                <h4 className="text-lg font-bold z-90">
-                                  {book["Book Name"]}
-                                </h4>
-                                <p className="text-sm">{book.AuthorName}</p>
+                              <div className="flex flex-col justify-center ml-4 text-left">
+                                <div className="flex items-center">
+                                  <small className="capitalize">
+                                    {book.Genre || "Uncategorized"}
+                                  </small>
+                                  <span className="mx-2">|</span>
+                                  <strong>
+                                    {book["Book Name"]} by {book.AuthorName}
+                                  </strong>
+                                </div>
                               </div>
                             </CardHeader>
                           </Card>
@@ -211,7 +243,7 @@ function Library() {
               removeWrapper
               alt={`${genre} genre`}
               className="z-0 w-full h-full object-cover"
-              src="book-bg.jpg" // Replace with actual image URLs
+              src="book-bg.jpg" // Replace with actual image URLs later
             />
           </Card>
         ))}
@@ -238,7 +270,9 @@ function Library() {
                 <Image
                   src={selectedBook?.img}
                   alt="Book cover"
-                  className="mb-4"
+                  className="mb-4 object-contain"
+                  width={300}
+                  height={300}
                 />
                 <p>
                   <strong>Author:</strong> {selectedBook?.author}

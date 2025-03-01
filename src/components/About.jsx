@@ -1,5 +1,5 @@
 import './about.css';
-import { Button } from './ui/button';
+// import { Button } from './ui/button';
 
 import { IconBrandFacebook, IconBrandInstagram, IconMail, IconBulb } from '@tabler/icons-react';
 import { Tooltip } from "@nextui-org/react";
