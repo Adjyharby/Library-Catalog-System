@@ -427,7 +427,7 @@ function Registration() {
           <TableColumn className="font-serif text-lg" key="Date" width="8%">
             DATE
           </TableColumn>
-          <TableColumn className="font-serif text-lg" key="Name" width="15%">
+          <TableColumn className="font-serif text-lg" key="Name" width="18%">
             NAME
           </TableColumn>
           <TableColumn className="font-serif text-lg" key="Gender" width="8%">
@@ -440,7 +440,7 @@ function Registration() {
           >
             YEAR LEVEL
           </TableColumn>
-          <TableColumn className="font-serif text-lg" key="Dept" width="20%">
+          <TableColumn className="font-serif text-lg" key="Dept" width="17%">
             DEPARTMENT
           </TableColumn>
           <TableColumn className="font-serif text-lg" key="purpose" width="20%">

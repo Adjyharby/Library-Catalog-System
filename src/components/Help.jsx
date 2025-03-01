@@ -32,7 +32,7 @@ function Help() {
         </Button>
         <Button
           onPress={() => setLibraryOpen(true)}
-          className="col-span-2 p-32"
+          className="col-span-2 p-32 "
           style={{height:"32.15rem", backgroundColor:'#57429D'}}
         >
           Library Help 
@@ -111,7 +111,7 @@ function Help() {
           <ModalContent>
             {(onClose) => (
               <>
-                <ModalHeader>Account Help</ModalHeader>
+                <ModalHeader>Registration Help</ModalHeader>
                 <ModalBody>
                   <p>Instructions on managing your account...</p>
                 </ModalBody>
