@@ -38,7 +38,7 @@ function About() {
 
         <div className='background'>
           <img src="ischan.jpeg" alt="" className='profile'/>
-          <h4 className="scroll-m-20 text-lg font-semibold tracking-tight mt-2">Christian Cantor</h4>
+          <h4 className="scroll-m-20 text-lg font-semibold tracking-tight mt-2">kalbo Cantor</h4>
           <p className="text-sm text-muted-foreground">Backend Developer </p>
           <blockquote className="mt-4 border-l-2 pl-2 italic text-sm mb-8">"when doubt clouds your mind and fear blurs your path, focus on just taking the next step."</blockquote>
           <div className='socials'>
