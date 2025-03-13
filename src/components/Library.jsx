@@ -31,6 +31,13 @@ function Library() {
 
   const searchInputRef = useRef(null);
 
+  // Define all available genres
+  const genres = [
+    "Adventure", "Romance", "Comedy", "Drama", "Sci-Fi", "Fantasy", 
+    "Mystery", "Thriller", "Horror", "Biography", "History", "Self-Help", 
+    "Poetry", "Science", "Travel", "Cooking"
+  ];
+
   // Fetch data from API on load
   useEffect(() => {
     handleFetchBookName(); // Fetch initial recommendations on component mount
@@ -250,30 +257,42 @@ function Library() {
         </ModalContent>
       </Modal>
 
-      {/* Categories */}
+      {/* Categories - Horizontally Scrollable */}
       <h3 className="text-lg font-semibold mb-3">Categories</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
-        {["Adventure", "Romance", "Comedy", "Drama"].map((genre, index) => (
-          <Card 
-            key={index} 
-            className="w-full h-[180px] relative"
-            isPressable
-            onPress={() => fetchBooksByGenre(genre)}
-          >
-            <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-              <p className="text-xs text-white/60 uppercase font-bold">
-                What to read
-              </p>
-              <h4 className="text-white font-medium text-sm">{genre}</h4>
-            </CardHeader>
-            <Image
-              removeWrapper
-              alt={`${genre} genre`}
-              className="z-0 w-full h-full object-cover"
-              src="book-bg.jpg" // Replace with actual image URLs later
-            />
-          </Card>
-        ))}
+      <div className="relative w-full mb-4">
+        <div className="flex overflow-x-auto pb-4 hide-scrollbar" style={{ scrollSnapType: 'x mandatory' }}>
+          {genres.map((genre, index) => (
+            <div key={index} className="flex-none w-[180px] mr-4" style={{ scrollSnapAlign: 'start' }}>
+              <Card 
+                className="w-full h-[180px] relative"
+                isPressable
+                onPress={() => fetchBooksByGenre(genre)}
+              >
+                <CardHeader className="absolute z-10 top-1 flex-col !items-start">
+                  <p className="text-xs text-white/60 uppercase font-bold">
+                    What to read
+                  </p>
+                  <h4 className="text-white font-medium text-sm">{genre}</h4>
+                </CardHeader>
+                <Image
+                  removeWrapper
+                  alt={`${genre} genre`}
+                  className="z-0 w-full h-full object-cover"
+                  src="book-bg.jpg" // Replace with actual image URLs later
+                />
+              </Card>
+            </div>
+          ))}
+        </div>
+        <style jsx>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
       </div>
 
       {/* Recommendations */}
