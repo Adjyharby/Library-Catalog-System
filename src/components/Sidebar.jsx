@@ -92,7 +92,7 @@ function Sidebar({ onSelectPage }) {
 
       {/* Direct admin login button - no popover */}
       <Button 
-        onClick={() => setAdminLoginOpen(true)}
+        onPress={() => setAdminLoginOpen(true)}
         className="functions mb-6"
       >
         <IconUserCog size={30} color="#ffc683"/>

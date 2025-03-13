@@ -25,6 +25,9 @@ function Library() {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
+  const [activeGenre, setActiveGenre] = useState(null);
+  const [genreResults, setGenreResults] = useState([]);
+  const [genreModalOpen, setGenreModalOpen] = useState(false);
 
   const searchInputRef = useRef(null);
 
@@ -84,6 +87,24 @@ function Library() {
       setSearchResults(response.data || []);
     } catch (error) {
       console.error("Error fetching books:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch books by genre
+  const fetchBooksByGenre = async (genre) => {
+    setLoading(true);
+    setActiveGenre(genre);
+    try {
+      const response = await axios.get(
+        `http://localhost/API/Catalog.php?genre=${encodeURIComponent(genre)}`
+      );
+      console.log("Genre response:", response.data);
+      setGenreResults(response.data || []);
+      setGenreModalOpen(true);
+    } catch (error) {
+      console.error(`Error fetching ${genre} books:`, error);
     } finally {
       setLoading(false);
     }
@@ -232,8 +253,13 @@ function Library() {
       {/* Categories */}
       <h3 className="text-lg font-semibold mb-3">Categories</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
-        {["Adventure", "Horror", "Comedy", "Drama"].map((genre, index) => (
-          <Card key={index} className="w-full h-[180px] relative">
+        {["Adventure", "Romance", "Comedy", "Drama"].map((genre, index) => (
+          <Card 
+            key={index} 
+            className="w-full h-[180px] relative"
+            isPressable
+            onPress={() => fetchBooksByGenre(genre)}
+          >
             <CardHeader className="absolute z-10 top-1 flex-col !items-start">
               <p className="text-xs text-white/60 uppercase font-bold">
                 What to read
@@ -250,20 +276,18 @@ function Library() {
         ))}
       </div>
 
-{/* Recommendations */}
-<h3 className="text-lg font-semibold mb-0" style={{ marginBottom: "0px" }}>
-  Recommendations
-</h3>
-<div
-  className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-x-4 mt-0 "
-  style={{ marginTop: "0px" }}
->
-  {recommendations.map((book, index) => (
-    <RecommendationCard key={index} book={book} onOpen={openBookModal} />
-  ))}
-</div>
-
-
+      {/* Recommendations */}
+      <h3 className="text-lg font-semibold mb-0" style={{ marginBottom: "0px" }}>
+        Recommendations
+      </h3>
+      <div
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-x-4 mt-0"
+        style={{ marginTop: "0px" }}
+      >
+        {recommendations.map((book, index) => (
+          <RecommendationCard key={index} book={book} onOpen={openBookModal} />
+        ))}
+      </div>
 
       {/* Book Detail Modal */}
       <Modal
@@ -296,6 +320,82 @@ function Library() {
               </ModalBody>
               <ModalFooter>
                 <Button onPress={onClose}>Close</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Genre Results Modal */}
+      <Modal
+        isOpen={genreModalOpen}
+        onOpenChange={setGenreModalOpen}
+        backdrop="opaque"
+        size="3xl"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>{activeGenre} Books</ModalHeader>
+              <ModalBody>
+                {genreResults.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {genreResults.map((book, index) => (
+                      <Card
+                        key={book.CatalogID || index}
+                        className="w-full"
+                        isPressable
+                        onPress={() =>
+                          openBookModal({
+                            title: book["Book Name"],
+                            author: book.AuthorName,
+                            genre: book.Genre,
+                            description:
+                              book["ShortDesc"] || "No description available.",
+                            img:
+                              book["ImageDir"] && book["ImageDir"].trim() !== ""
+                                ? book["ImageDir"]
+                                : "placeholder.jpg",
+                          })
+                        }
+                      >
+                        <CardHeader className="flex flex-row items-center justify-start w-full">
+                          <Image
+                            src={
+                              book["ImageDir"] && book["ImageDir"].trim() !== ""
+                                ? book["ImageDir"]
+                                : "placeholder.jpg"
+                            }
+                            alt={book["Book Name"]}
+                            width={75}
+                            height={75}
+                            className="object-contain"
+                          />
+                          <div className="flex flex-col justify-center ml-4 text-left">
+                            <div className="flex items-center">
+                              <strong>
+                                {book["Book Name"]} by {book.AuthorName}
+                              </strong>
+                            </div>
+                            <p className="text-sm mt-1">
+                              {book["ShortDesc"]
+                                ? book["ShortDesc"].substring(0, 100) + "..."
+                                : "No description available."}
+                            </p>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No books found in this category.</p>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
               </ModalFooter>
             </>
           )}
