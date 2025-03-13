@@ -138,7 +138,7 @@ function Library() {
         <h1 className="scroll-m-20 text-5xl lg:text-7xl font-extrabold tracking-tight mt-4 sm:mb-0">
           Library
         </h1>
-        <Button onPress={handleModalOpen} className="min-w-[850px] h-10 mr-4">
+        <Button onPress={handleModalOpen} className="w-full sm:w-auto px-4 h-10">
           <IconSearch />
           Tap to search....
         </Button>
@@ -158,19 +158,12 @@ function Library() {
               <ModalHeader>Search for Books</ModalHeader>
               <ModalBody>
                 <div className="w-full px-4">
-                  <Input
+                <Input
                     ref={searchInputRef}
-                    classNames={{
-                      base: "max-w-full sm:max-w-[10rem] h-10",
-                      mainWrapper: "h-full",
-                      input: "text-small",
-                      inputWrapper:
-                        "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-                    }}
-                    placeholder="Type to search..."
-                    size="sm"
+                    className="w-full"
+                    size="lg"
+                    placeholder="Search for books, authors, or genres..."
                     startContent={<IconSearch size={18} />}
-                    type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -181,12 +174,13 @@ function Library() {
                   />
 
                   <Button
-                    onPress={fetchBooks}
-                    className="mt-4"
-                    isLoading={loading}
-                  >
-                    Search
-                  </Button>
+                      onPress={fetchBooks}
+                      className="ml-2"
+                      color="primary"
+                      isLoading={loading}
+                    >
+                      Search
+                    </Button>
 
                   <div className="mt-4 w-full">
                     {searchResults.length > 0 ? (
@@ -211,6 +205,7 @@ function Library() {
                             })
                           }
                         >
+
                           <CardHeader className="flex flex-row items-center justify-start w-full">
                             <Image
                               src={
@@ -258,13 +253,16 @@ function Library() {
       </Modal>
 
       {/* Categories - Horizontally Scrollable */}
-      <h3 className="text-lg font-semibold mb-3">Categories</h3>
-      <div className="relative w-full mb-4">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-semibold">Categories</h3>
+        <p className="text-xs text-gray-500">Scroll to see more →</p>
+      </div>
+      <div className="relative w-full mb-6">
         <div className="flex overflow-x-auto pb-4 hide-scrollbar" style={{ scrollSnapType: 'x mandatory' }}>
           {genres.map((genre, index) => (
             <div key={index} className="flex-none w-[180px] mr-4" style={{ scrollSnapAlign: 'start' }}>
               <Card 
-                className="w-full h-[180px] relative"
+                className="w-full h-[180px] relative hover:scale-105 transition-transform duration-200"
                 isPressable
                 onPress={() => fetchBooksByGenre(genre)}
               >
@@ -278,7 +276,7 @@ function Library() {
                   removeWrapper
                   alt={`${genre} genre`}
                   className="z-0 w-full h-full object-cover"
-                  src="book-bg.jpg" // Replace with actual image URLs later
+                  src="book-bg.jpg"
                 />
               </Card>
             </div>
@@ -296,54 +294,61 @@ function Library() {
       </div>
 
       {/* Recommendations */}
-      <h3 className="text-lg font-semibold mb-0" style={{ marginBottom: "0px" }}>
-        Recommendations
-      </h3>
-      <div
-        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-x-4 mt-0"
-        style={{ marginTop: "0px" }}
-      >
-        {recommendations.map((book, index) => (
-          <RecommendationCard key={index} book={book} onOpen={openBookModal} />
-        ))}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {recommendations.map((book, index) => (
+            <RecommendationCard key={index} book={book} onOpen={openBookModal} className="transition-transform duration-200 hover:scale-105 hover:shadow-lg" />
+          ))}
+        </div>
       </div>
 
       {/* Book Detail Modal */}
       <Modal
-        isOpen={isBookOpen}
-        onOpenChange={setBookOpen}
-        backdrop="opaque"
-        size="1xl"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>{selectedBook?.title}</ModalHeader>
-              <ModalBody>
-                <Image
-                  src={selectedBook?.img}
-                  alt="Book cover"
-                  className="mb-4 object-contain"
-                  width={300}
-                  height={300}
-                />
-                <p>
-                  <strong>Author:</strong> {selectedBook?.author}
-                </p>
-                <p>
-                  <strong>Genre:</strong> {selectedBook?.genre}
-                </p>
-                <p>
-                  <strong>Description:</strong> {selectedBook?.description}
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button onPress={onClose}>Close</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+  isOpen={isBookOpen}
+  onOpenChange={setBookOpen}
+  backdrop="opaque"
+  size="2xl"
+>
+  <ModalContent>
+    {(onClose) => (
+      <>
+        <ModalBody className="p-0">
+          <div className="flex flex-col md:flex-row">
+            <div className="w-full md:w-2/5 bg-gradient-to-b from-purple-500 to-blue-500 p-6 flex items-center justify-center">
+              <Image
+                src={selectedBook?.img}
+                alt="Book cover"
+                className="object-contain max-h-64 shadow-xl rounded"
+                width={200}
+                height={300}
+              />
+            </div>
+            <div className="w-full md:w-3/5 p-6">
+              <h2 className="text-2xl font-bold mb-2">{selectedBook?.title}</h2>
+              <p className="text-gray-500 mb-4">by {selectedBook?.author}</p>
+              
+              <div className="mb-4">
+                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
+                  {selectedBook?.genre}
+                </span>
+              </div>
+              
+              <h3 className="text-lg font-semibold mb-2">About this book</h3>
+              <p className="text-gray-700 mb-6">{selectedBook?.description}</p>
+              
+              <div className="flex justify-end">
+                <Button color="primary" variant="flat" onPress={onClose}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </ModalBody>
+      </>
+    )}
+  </ModalContent>
+</Modal>
 
       {/* Genre Results Modal */}
       <Modal
