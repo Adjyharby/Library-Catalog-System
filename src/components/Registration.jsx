@@ -10,7 +10,8 @@ import {
   Tooltip,
   Input,
   DateInput,
-
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
 import {
   Table,
@@ -29,35 +30,27 @@ import { Time } from "@internationalized/date";
 import "./reg.css";
 import DateDisplay from "./DateDisplay.jsx";
 import Clock from "./Clock.jsx";
-
-// for exporting functionality
 import * as XLSX from "xlsx";
 
 function Registration() {
-  // State to hold the fetched data
-  const [items, setItems] = useState([]); // Stores the list of attendees
-  const [selectedKey, setSelectedKey] = useState(null); // Tracks the selected row
-  const [page, setPage] = useState(1); // Current page for pagination
-  const rowsPerPage = 6; // Set rows per page
-  const pages = Math.ceil(items.length / rowsPerPage); // Calculate total pages
+  const [items, setItems] = useState([]);
+  const [selectedKey, setSelectedKey] = useState(null);
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 6;
+  const pages = Math.ceil(items.length / rowsPerPage);
 
-  // State for modal form inputs
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [yearLevel, setYearLevel] = useState("");
   const [course, setCourse] = useState("");
   const [purpose, setPurpose] = useState("");
-  const [eventDate, setEventDate] = useState(new CalendarDate(2024, 4, 4)); // Default date
-  const [eventTime, setEventTime] = useState(new Time(11, 45)); // Default time
+  const [eventDate, setEventDate] = useState(new CalendarDate(2024, 4, 4));
+  const [eventTime, setEventTime] = useState(new Time(11, 45));
 
-  // ===========================
-  // Export Filter States
   const [filterDate, setFilterDate] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
 
-  // Compute filtered items based on export filters.
-  // (For exporting we use the complete list of items; adjust filters as needed)
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchDate = filterDate ? item.Date === filterDate : true;
@@ -67,85 +60,62 @@ function Registration() {
       return matchDate && matchDept;
     });
   }, [items, filterDate, filterDepartment]);
-  // ===========================
 
-  // Fetch data from API
   const fetchData = async () => {
     try {
       const response = await fetch("http://localhost/API/attendance.php");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      if (!response.ok) throw new Error("Network response was not ok");
       const result = await response.json();
-      setItems(result); // Update state with fetched data
+      setItems(result);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  // Fetch data when component mounts
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Handle selection change
   const handleSelectionChange = (key) => {
-    setSelectedKey(key); // Set the selected row's key
-    console.log("Selected row:", key); // Logs the currently selected row key
+    setSelectedKey(key);
+    console.log("Selected row:", key);
   };
 
-  // Compute items for the current page
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return items.slice(start, end);
   }, [page, items]);
 
-  // Modal state management
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [backdrop, setBackdrop] = useState("opaque");
 
-  const backdrops = ["opaque"];
-
   const handleOpen = (backdrop) => {
     setBackdrop(backdrop);
-    onOpen(); // Open the modal
+    onOpen();
     const now = new Date();
-
-    setEventDate(new CalendarDate(now.getFullYear(), now.getMonth(), now.getDate()));
-  setEventTime(new Time(now.getHours(), now.getMinutes()));
-
-  setBackdrop(backdrop);
-  onOpen(); // Open the modal
+    setEventDate(
+      new CalendarDate(now.getFullYear(), now.getMonth() + 1, now.getDate())
+    );
+    setEventTime(new Time(now.getHours(), now.getMinutes()));
   };
 
-  // Handle timeout submission
   const handleTimeout = async (attendeeID) => {
     const now = new Date();
-    const currentTime = now.toTimeString().split(" ")[0]; // Get current time (HH:MM:SS)
-
-    const data = {
-      AttendeeID: attendeeID,
-      TimeOut: currentTime,
-    };
+    const currentTime = now.toTimeString().split(" ")[0];
+    const data = { AttendeeID: attendeeID, TimeOut: currentTime };
 
     try {
       const response = await fetch("http://localhost/API/updateTimeOut.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
+      if (!response.ok) throw new Error("Network response was not ok");
       const result = await response.json();
       if (result.success) {
         console.log("TimeOut updated successfully");
-        fetchData(); // Refresh data after updating timeout
+        fetchData();
       } else {
         console.error("Failed to update TimeOut:", result.error);
       }
@@ -154,24 +124,17 @@ function Registration() {
     }
   };
 
-  
-
-  // Handle form submission
   const handleSubmit = async () => {
     const now = new Date();
-    const currentTime = now.toTimeString().split(" ")[0]; // Get current time
-    // const currentDate = now.toISOString().split("T")[0]; 
-
-    const currentDate = new Date(now.setDate(now.getDate() + 1)).toISOString().split("T")[0];
-    
-    console.log("Tomorrow's Date:", currentDate);
-    
-    
+    const currentTime = now.toTimeString().split(" ")[0];
+    const currentDate = new Date(now.setDate(now.getDate() + 1))
+      .toISOString()
+      .split("T")[0];
 
     if (!isFormValid) return;
 
     const data = {
-      AttendeeID: "", // Generate or fetch a unique ID if required
+      AttendeeID: "",
       Name: name || "",
       Gender: gender || "",
       Age: age || "",
@@ -185,23 +148,15 @@ function Registration() {
     try {
       const response = await fetch("http://localhost/API/Attendance.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      // const result = await response.json();
-
+      if (!response.ok) throw new Error("Network response was not ok");
       onClose();
       setName("");
       setGender("");
       setAge("");
-      setCourse("");  
+      setCourse("");
       setYearLevel("");
       setPurpose("");
       fetchData();
@@ -221,25 +176,43 @@ function Registration() {
     );
   }, [name, age, gender, yearLevel, course, purpose]);
 
-   // ===========================
-  // Export function
-  
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredItems);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
     XLSX.writeFile(workbook, "attendance.xlsx");
   };
-  // ===========================
+
+  // Dropdown options
+  const genderOptions = [
+    { key: "Male", label: "Male" },
+    { key: "Female", label: "Female" },
+    { key: "LGBT+", label: "LGBT+" },
+  ];
+
+  const yearLevelOptions = [
+    { key: "1st", label: "1st" },
+    { key: "2nd", label: "2nd" },
+    { key: "3rd", label: "3rd" },
+    { key: "4th", label: "4th" },
+  ];
+
+  const courseOptions = [
+    { key: "Infotech", label: "Infotech" },
+    { key: "Education", label: "Education" },
+    { key: "Industrial", label: "Industrial" },
+    { key: "HTM", label: "HTM" },
+    { key: "Agriculture", label: "Agriculture" },
+  ];
 
   return (
     <div className="p-2">
+      {/* Existing top section */}
       <div className="top flex items-center mx-3">
         <h1 className="flex items-center scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-4xl mb-2 mr-4">
           <img
             src="/registration.png"
             alt="Registration icon"
-            color="#ffc683"
             className="mr-2 size-14"
           />
           Registration
@@ -248,98 +221,52 @@ function Registration() {
           <Clock className="top-right-clock" />
         </div>
       </div>
-
       <hr className="m-2 border-2 border-gray-300 " />
 
-   
-
-      {/* Search Bar and Check-In Button */}
-      <div
-        className="searchBarAndCheckInBtn flex align items-center"
-        style={{ margin: "-20px", marginLeft: "20px" }}
-      >
+      <div className="searchBarAndCheckInBtn flex align items-center" style={{ margin: "-20px", marginLeft: "20px" }}>
         <DateDisplay />
-
-        {/* PopOutButton */}
-        <div
-          className="flex ml-auto flex-wrap gap-4 mb-10 justify-center sm:gap-3 md:gap-4"
-          style={{ marginRight: "40px" }}
-        >
-          {backdrops.map((b) => (
-            <Tooltip
-              key={b}
-              placement={"top-end"}
-              content={
-                <div className="px-1 py-2">
-                  <div className="text-tiny">Click to Register</div>
-                </div>
-              }
-            >
-              <Button
-                variant="flat"
-                color="warning"
-                onPress={() => handleOpen(b)}
-                className="capitalize px-4 py-2 md:text-base w-[200px] h-[50px] font-serif"
-              >
-                Register
-              </Button>
-            </Tooltip>
-          ))}
+        <div className="flex ml-auto flex-wrap gap-4 mb-10 justify-center sm:gap-3 md:gap-4" style={{ marginRight: "40px" }}>
+          <Tooltip placement="top-end" content={<div className="px-1 py-2"><div className="text-tiny">Click to Register</div></div>}>
+            <Button variant="flat" color="warning" onPress={() => handleOpen("opaque")} className="capitalize px-4 py-2 md:text-base w-[200px] h-[50px] font-serif">
+              Register
+            </Button>
+          </Tooltip>
         </div>
 
         <Modal backdrop={backdrop} isOpen={isOpen} onClose={onClose} size="2xl">
           <ModalContent className="bg-gray-200 p-6 rounded-lg shadow-lg">
             <>
               <ModalHeader className="text-2xl font-semibold">
-                <img
-                  src="/registration.png"
-                  alt="Registration icon"
-                  color="#ffc683"
-                  className="mr-2 size-8"
-                />
+                <img src="/registration.png" alt="Registration icon" className="mr-2 size-8" />
                 Register
               </ModalHeader>
               <ModalBody className="space-y-6">
-                {/* Date and Time Section */}
-        <div>
-          <h2 className="text-lg font-medium mb-2">Date and Time</h2>
-          <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-            <DateInput
-              label="Date"
-              value={eventDate}
-              onChange={setEventDate}
-              placeholderValue={new CalendarDate(1995, 11, 6)}
-              labelPlacement="outside"
-              className="w-full md:w-1/2"
-              endContent={
-                <CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
-            />
-            <TimeInput
-              label="Event Time"
-              value={eventTime}
-              onChange={setEventTime}
-              labelPlacement="outside"
-              className="w-full md:w-1/2"
-              endContent={
-                <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
-            />
-          </div>
-        </div>
+                <div>
+                  <h2 className="text-lg font-medium mb-2">Date and Time</h2>
+                  <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
+                    <DateInput
+                      label="Date"
+                      value={eventDate}
+                      onChange={setEventDate}
+                      placeholderValue={new CalendarDate(1995, 11, 6)}
+                      labelPlacement="outside"
+                      className="w-full md:w-1/2"
+                      endContent={<CalendarIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    />
+                    <TimeInput
+                      label="Event Time"
+                      value={eventTime}
+                      onChange={setEventTime}
+                      labelPlacement="outside"
+                      className="w-full md:w-1/2"
+                      endContent={<ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    />
+                  </div>
+                </div>
+                <hr className="border-2 border-gray-300" style={{ marginTop: "3px" }} />
 
-                <hr
-                  className="border-2 border-gray-300"
-                  style={{ marginTop: "3px" }}
-                />
-
-                {/* Registration Details Section */}
                 <div style={{ marginTop: "10px" }}>
-                  <h2 className="text-lg font-medium mb-2">
-                    Personal Information
-                  </h2>
-
-                  {/* Name */}
+                  <h2 className="text-lg font-medium mb-2">Personal Information</h2>
                   <Input
                     isRequired
                     type="text"
@@ -349,53 +276,59 @@ function Registration() {
                     onChange={(e) => setName(e.target.value)}
                     className="w-full mb-4"
                   />
-
-                  {/* Age Field */}
                   <Input
                     isRequired
-                    type="number" // Set input type to number
+                    type="number"
                     label="Age"
                     placeholder="Enter your age"
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
                     className="w-full mb-4"
                   />
-
-                  {/* Gender and Year Level */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <Input
+                    <Select
                       isRequired
-                      type="text"
                       label="Gender"
-                      placeholder="Enter your gender(Male, Female, LGBT+...)"
+                      placeholder="Select your gender"
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="w-full mb-4"
-                    />
-
-                    <Input
+                      className="w-full"
+                    >
+                      {genderOptions.map((option) => (
+                        <SelectItem key={option.key} value={option.key}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <Select
                       isRequired
-                      type="text"
                       label="Year Level"
-                      placeholder="Enter your year level (1st, 2nd, 3rd, 4th)"
+                      placeholder="Select your year level"
                       value={yearLevel}
                       onChange={(e) => setYearLevel(e.target.value)}
-                      className="w-full mb-4"
-                    />
+                      className="w-full"
+                    >
+                      {yearLevelOptions.map((option) => (
+                        <SelectItem key={option.key} value={option.key}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
                   </div>
-
-                  {/* Course */}
-                  <Input
+                  <Select
                     isRequired
-                    type="text"
                     label="Course"
-                    placeholder="Enter course(Infotech, Education...)"
+                    placeholder="Select your course"
                     value={course}
                     onChange={(e) => setCourse(e.target.value)}
                     className="w-full mb-4"
-                  />
-
-                  {/* Purpose */}
+                  >
+                    {courseOptions.map((option) => (
+                      <SelectItem key={option.key} value={option.key}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
                   <Input
                     isRequired
                     type="text"
@@ -407,7 +340,6 @@ function Registration() {
                   />
                 </div>
               </ModalBody>
-
               <ModalFooter className="flex justify-end space-x-3">
                 <Button color="danger" variant="light" onPress={onClose}>
                   Cancel
@@ -415,19 +347,18 @@ function Registration() {
                 <Button
                   color="primary"
                   onPress={handleSubmit}
-                  disabled={!isFormValid} // Tied to form validation
-                  className={!isFormValid ? "opacity-50 cursor-not-allowed" : ""} // Optional: Add styling for disabled state
+                  disabled={!isFormValid}
+                  className={!isFormValid ? "opacity-50 cursor-not-allowed" : ""}
                 >
                   Save
                 </Button>
-
               </ModalFooter>
             </>
           </ModalContent>
         </Modal>
       </div>
 
-      {/* Table */}
+      {/* Table and Export Controls remain unchanged */}
       <Table
         aria-label="Example table with single selection"
         onSelectionChange={handleSelectionChange}
@@ -446,16 +377,10 @@ function Registration() {
             />
           </div>
         }
-        classNames={{
-          wrapper: "h-[30.75rem]",
-        }}
+        classNames={{ wrapper: "h-[30.75rem]" }}
       >
         <TableHeader>
-          <TableColumn
-            className="font-serif text-lg"
-            key="AttendeeID"
-            width="5%"
-          >
+          <TableColumn className="font-serif text-lg" key="AttendeeID" width="5%">
             NO.
           </TableColumn>
           <TableColumn className="font-serif text-lg" key="Date" width="8%">
@@ -467,11 +392,7 @@ function Registration() {
           <TableColumn className="font-serif text-lg" key="Gender" width="8%">
             GENDER
           </TableColumn>
-          <TableColumn
-            className="font-serif text-lg"
-            key="YearLevel"
-            width="9%"
-          >
+          <TableColumn className="font-serif text-lg" key="YearLevel" width="9%">
             YEAR LEVEL
           </TableColumn>
           <TableColumn className="font-serif text-lg" key="Dept" width="17%">
@@ -488,66 +409,61 @@ function Registration() {
           </TableColumn>
         </TableHeader>
         <TableBody items={paginatedItems}>
-  {(item) => (
-    <TableRow
-      key={item.AttendeeID}
-      data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
-      onClick={() => setSelectedKey(item.AttendeeID)}
-      style={{ height: "0.5rem" }}
-      className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
-    >
-      {(columnKey) => (
-        <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
-          {columnKey === "TimeOut" ? (
+          {(item) => (
+            <TableRow
+              key={item.AttendeeID}
+              data-selected={selectedKey === item.AttendeeID ? "true" : undefined}
+              onClick={() => setSelectedKey(item.AttendeeID)}
+              style={{ height: "0.5rem" }}
+              className={`cursor-pointer text-xxs capitalize ${selectedKey === item.AttendeeID ? "table-row-selected" : "table-row-hover"}`}
+            >
+              {(columnKey) => (
+                <TableCell key={columnKey} className="p-2.5 m-0 text-sm">
+                  {columnKey === "TimeOut" ? (
                     item.TimeOut === "00:00:00" || item.TimeOut == null ? (
-                      // Check if TimeOut is '00:00:00' or null
-              <button
-                className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
-                style={{ marginTop: "-20px" }}
-                onClick={() => handleTimeout(item.AttendeeID)} // Send the current row's ID to handleTimeout
-              >
-                Time Out
-              </button>
-            ) : (
-              item.TimeOut // Display the TimeOut value if it's available
-            )
-          ) : (
-            item[columnKey] // For other columns, just display the value
+                      <button
+                        className="border-red-400 border-1 m rounded-lg cursor-pointer p-1 bg-red-200 hover:bg-red-300"
+                        style={{ marginTop: "-20px" }}
+                        onClick={() => handleTimeout(item.AttendeeID)}
+                      >
+                        Time Out
+                      </button>
+                    ) : (
+                      item.TimeOut
+                    )
+                  ) : (
+                    item[columnKey]
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
           )}
-        </TableCell>
-      )}
-    </TableRow>
-  )}
-</TableBody>
-
-
+        </TableBody>
       </Table>
 
-{/* Export Controls */}
-<div className="export-controls mb-4">
-  <h2 className="mb-2 ">Export file</h2>
-  <div className="flex items-center gap-4">
-    <Input
-      type="date"
-      label="Filter by Date"
-      value={filterDate}
-      onChange={(e) => setFilterDate(e.target.value)}
-      className="max-w-xs h-10"  // Force input height
-    />
-    <Input
-      type="text"
-      label="Filter by Department"
-      placeholder="Enter department"
-      value={filterDepartment}
-      onChange={(e) => setFilterDepartment(e.target.value)}
-      className="max-w-xs h-10"  // Force input height
-    />
-    <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
-      Export as Excel
-    </Button>
-  </div>
-</div>
-
+      <div className="export-controls mb-4">
+        <h2 className="mb-2 ">Export file</h2>
+        <div className="flex items-center gap-4">
+          <Input
+            type="date"
+            label="Filter by Date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="max-w-xs h-10"
+          />
+          <Input
+            type="text"
+            label="Filter by Department"
+            placeholder="Enter department"
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="max-w-xs h-10"
+          />
+          <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
+            Export as Excel
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
