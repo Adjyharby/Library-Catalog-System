@@ -45,7 +45,7 @@ function About() {
             
           <Tooltip showArrow={true} placement='bottom' content="Christian Cantor"  >
             <a href="https://www.facebook.com/christian.cantor.902">
-                  <IconBrandFacebook color='#ffc683' size={30} style={{
+                  <IconBrandFacebook color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                     marginRight: '15px',
                     cursor: 'pointer'
                   }}/>
@@ -54,7 +54,7 @@ function About() {
 
           <Tooltip showArrow={true} placement='bottom' content="Christian Cantor">
             <a href="www.instagram.com">
-              <IconBrandInstagram color='#ffc683' size={30} style={{
+              <IconBrandInstagram color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   marginRight: '15px',
                   cursor: 'pointer'
                 }}/>
@@ -63,7 +63,7 @@ function About() {
           </Tooltip>
 
           <Tooltip showArrow={true} placement='bottom' content="cantorchristian117@gmail.com">
-              <IconMail color='#ffc683' size={30} style={{
+              <IconMail color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                 cursor: 'pointer'
               }}/>
           </Tooltip>
@@ -81,7 +81,7 @@ function About() {
           <div className='socials'>
           <Tooltip showArrow={true} placement='bottom' content="Noel Salazar">
             <a href="https://www.facebook.com/profile.php?id=100063708997272">
-                <IconBrandFacebook color='#ffc683' size={30} style={{
+                <IconBrandFacebook color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   marginRight: '15px',
                   cursor: 'pointer'
                 }}/>
@@ -90,7 +90,7 @@ function About() {
 
             <Tooltip showArrow={true} placement='bottom' content="Noel Salazar">
               <a href="">
-                <IconBrandInstagram color='#ffc683' size={30} style={{
+                <IconBrandInstagram color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                     marginRight: '15px',
                     cursor: 'pointer'
                   }}/>
@@ -98,7 +98,7 @@ function About() {
             </Tooltip>
 
             <Tooltip showArrow={true} placement='bottom' content="theenderwolfadjourner@gmail.com">
-                <IconMail color='#ffc683' size={30} style={{
+                <IconMail color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   cursor: 'pointer'
                 }}/>
             </Tooltip>
@@ -113,7 +113,7 @@ function About() {
           <div className='socials'>
           <Tooltip showArrow={true} placement='bottom' content="Jean Marianne Elica" style={{fontSize:"10px"}}>
               <a href="https://www.facebook.com/jeanmarianne.elica.9">
-                  <IconBrandFacebook color='#ffc683' size={30} style={{
+                  <IconBrandFacebook color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                     marginRight: '15px',
                     cursor: 'pointer'
                   }}/>
@@ -122,7 +122,7 @@ function About() {
 
             <Tooltip showArrow={true} placement='bottom' content="@mar_nine">
               <a href="https://www.instagram.com/mar_nine_/?hl=en">
-                <IconBrandInstagram color='#ffc683' size={30} style={{
+                <IconBrandInstagram color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                     marginRight: '15px',
                     cursor: 'pointer'
                   }}/>
@@ -130,7 +130,7 @@ function About() {
             </Tooltip>
 
             <Tooltip showArrow={true} placement='bottom' content="myhuskimochi@gmail.com">
-                <IconMail color='#ffc683' size={30} style={{
+                <IconMail color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   cursor: 'pointer'
                 }}/>
             </Tooltip>
@@ -146,7 +146,7 @@ function About() {
           <div className='socials'>
           <Tooltip showArrow={true} placement='bottom' content="Philippe Garibay" >
               <a href="www.facebook.com">
-                <IconBrandFacebook color='#ffc683' size={30} style={{
+                <IconBrandFacebook color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   marginRight: '15px',
                   cursor: 'pointer'
                 }}/>
@@ -156,7 +156,7 @@ function About() {
 
             <Tooltip showArrow={true} placement='bottom' content="@iamfinethankyouandlou_">
               <a href="https://www.instagram.com/iamfinethankyouandlou_/?hl=en">
-                <IconBrandInstagram color='#ffc683' size={30} style={{
+                <IconBrandInstagram color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                     marginRight: '15px',
                     cursor: 'pointer'
                   }}/>
@@ -164,7 +164,7 @@ function About() {
             </Tooltip>
 
             <Tooltip showArrow={true} placement='bottom' content="louisgaribay7000@gmail.com">
-                <IconMail color='#ffc683' size={30} style={{
+                <IconMail color='#ffc683' size={30} className="hover:scale-110 transition-transform" style={{
                   cursor: 'pointer'
                 }}/>
             </Tooltip>
