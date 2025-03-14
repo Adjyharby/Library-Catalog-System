@@ -12,6 +12,8 @@ import {
   DateInput,
   Select,
   SelectItem,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import {
   Table,
@@ -126,13 +128,13 @@ function Registration() {
 
   const handleSubmit = async () => {
     const now = new Date();
-    const currentTime = now.toTimeString().split(" ")[0]; // Get current time (HH:MM:SS)
-    const currentDate = now.toISOString().split("T")[0]; // Get current date (YYYY-MM-DD)
-  
+    const currentTime = now.toTimeString().split(" ")[0];
+    const currentDate = now.toISOString().split("T")[0];
+
     if (!isFormValid) return;
-  
+
     const data = {
-      AttendeeID: "", // Generate or fetch a unique ID if required
+      AttendeeID: "",
       Name: name || "",
       Gender: gender || "",
       Age: age || "",
@@ -142,25 +144,19 @@ function Registration() {
       YearLevel: yearLevel || "",
       purpose: purpose || "",
     };
-  
+
     try {
       const response = await fetch("http://localhost/API/Attendance.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-  
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-  
+      if (!response.ok) throw new Error("Network response was not ok");
       onClose();
       setName("");
       setGender("");
       setAge("");
-      setCourse("");  
+      setCourse("");
       setYearLevel("");
       setPurpose("");
       fetchData();
@@ -187,7 +183,6 @@ function Registration() {
     XLSX.writeFile(workbook, "attendance.xlsx");
   };
 
-  // Dropdown options
   const genderOptions = [
     { key: "Male", label: "Male" },
     { key: "Female", label: "Female" },
@@ -204,14 +199,18 @@ function Registration() {
   const courseOptions = [
     { key: "Infotech", label: "Infotech" },
     { key: "Education", label: "Education" },
-    { key: "Industrial", label: "Industrial" },
-    { key: "HTM", label: "HTM" },
-    { key: "Agriculture", label: "Agriculture" },
+    { key: "Engineering", label: "Engineering" },
+    { key: "Business", label: "Business" },
+  ];
+
+  const purposeOptions = [
+    { key: "To read books", label: "To read books" },
+    { key: "To research", label: "To research" },
+    { key: "Clearance", label: "Clearance" },
   ];
 
   return (
     <div className="p-2">
-      {/* Existing top section */}
       <div className="top flex items-center mx-3">
         <h1 className="flex items-center scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-4xl mb-2 mr-4">
           <img
@@ -333,15 +332,22 @@ function Registration() {
                       </SelectItem>
                     ))}
                   </Select>
-                  <Input
+                  <Autocomplete
                     isRequired
-                    type="text"
                     label="Purpose"
-                    placeholder="What is your purpose..."
+                    placeholder="Select or type your purpose"
                     value={purpose}
-                    onChange={(e) => setPurpose(e.target.value)}
+                    onInputChange={setPurpose}
                     className="w-full"
-                  />
+                    defaultItems={purposeOptions}
+                    allowsCustomValue={true} // Allows typing custom values
+                  >
+                    {(item) => (
+                      <AutocompleteItem key={item.key} value={item.key}>
+                        {item.label}
+                      </AutocompleteItem>
+                    )}
+                  </Autocomplete>
                 </div>
               </ModalBody>
               <ModalFooter className="flex justify-end space-x-3">
@@ -362,7 +368,6 @@ function Registration() {
         </Modal>
       </div>
 
-      {/* Table and Export Controls remain unchanged */}
       <Table
         aria-label="Example table with single selection"
         onSelectionChange={handleSelectionChange}
