@@ -126,15 +126,13 @@ function Registration() {
 
   const handleSubmit = async () => {
     const now = new Date();
-    const currentTime = now.toTimeString().split(" ")[0];
-    const currentDate = new Date(now.setDate(now.getDate() + 1))
-      .toISOString()
-      .split("T")[0];
-
+    const currentTime = now.toTimeString().split(" ")[0]; // Get current time (HH:MM:SS)
+    const currentDate = now.toISOString().split("T")[0]; // Get current date (YYYY-MM-DD)
+  
     if (!isFormValid) return;
-
+  
     const data = {
-      AttendeeID: "",
+      AttendeeID: "", // Generate or fetch a unique ID if required
       Name: name || "",
       Gender: gender || "",
       Age: age || "",
@@ -144,19 +142,25 @@ function Registration() {
       YearLevel: yearLevel || "",
       purpose: purpose || "",
     };
-
+  
     try {
       const response = await fetch("http://localhost/API/Attendance.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Network response was not ok");
+  
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+  
       onClose();
       setName("");
       setGender("");
       setAge("");
-      setCourse("");
+      setCourse("");  
       setYearLevel("");
       setPurpose("");
       fetchData();
