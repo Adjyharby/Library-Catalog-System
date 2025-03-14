@@ -41,18 +41,16 @@ function Library() {
   ];
 
   useEffect(() => {
-    handleFetchBookName(); // Initial fetch on mount
+    handleFetchBookName();
   }, []);
 
   const handleFetchBookName = (books) => {
     if (Array.isArray(books)) {
-      // If called from RandomNumberComponent with an array
       setRecommendations(books);
     } else {
-      // Original logic for manual fetch
       const fetchMultipleBooks = async () => {
         const promises = Array.from({ length: 8 }, () => {
-          const randomId = Math.floor(Math.random() * 24) + 1; // Adjust range as needed
+          const randomId = Math.floor(Math.random() * 24) + 1;
           return fetch(`http://localhost/API/Catalog.php?CatalogID=${randomId}`)
             .then((response) => {
               if (!response.ok) throw new Error("Network response was not ok");
@@ -144,7 +142,7 @@ function Library() {
   return (
     <div className="w-full min-h-screen p-4 overflow-auto" style={{ alignItems: "center", justifyContent: "center", paddingTop: "0px" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-center mb-6 relative">
+      <div className="flex flex-col sm:flex-row mb-6 relative">
         <h1 className="scroll-m-20 text-5xl lg:text-7xl font-extrabold tracking-tight mt-4 sm:mb-0">
           Library
         </h1>
@@ -155,7 +153,7 @@ function Library() {
             size="lg"
             radius="full"
             onPress={handleModalOpen}
-            className="fixed top-4 right-4 z-10 hover:scale-105 transition-transform"
+            className="fixed top-4 right-20 z-10 hover:scale-105 transition-transform"
           >
             <IconSearch size={24} />
           </Button>
@@ -298,21 +296,6 @@ function Library() {
           >
             <IconChevronRight size={24} />
           </Button>
-          <style jsx>{`
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-            .hide-scrollbar {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-            }
-            .snap-x {
-              scroll-snap-type: x mandatory;
-            }
-            .snap-start {
-              scroll-snap-align: start;
-            }
-          `}</style>
         </div>
       </div>
 
