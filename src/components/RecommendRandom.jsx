@@ -5,43 +5,52 @@ function RandomNumberComponent({ onFetchBookData }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBookData = (number) => {
+  const fetchBookData = () => {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost/API/Catalog.php?CatalogID=${number}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (onFetchBookData) {
-          // Pass all book data to the parent after mapping null to empty strings
-          const mappedData = {
+    const promises = Array.from({ length: 8 }, () => {
+      const randomId = Math.floor(Math.random() * 1934) + 1; // Adjust range based on your API
+      return fetch(`http://localhost/API/Catalog.php?CatalogID=${randomId}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .catch((error) => {
+          console.error("Error fetching book data:", error);
+          return null; // Return null for failed fetches
+        });
+    });
+
+    Promise.all(promises)
+      .then((results) => {
+        const mappedData = results
+          .filter((data) => data && data["Book Name"]) // Filter out failed/null responses
+          .map((data) => ({
             title: data["Book Name"] || "",
-            author: data["Author"] || "",
+            author: data["Author"] || "", // Note: API uses "Author" here, not "AuthorName"
             genre: data["Genre"] || "",
-            description: data["Description"] || "",
+            description: data["Description"] || "", // Note: API uses "Description", not "ShortDesc"
             publicationYear: data["Publication Year"] || "",
-            img: data["Image URL"] || "", // Assuming the key is "Image URL"
-          };
-          onFetchBookData(mappedData);
+            img: data["Image URL"] || "/placeholder.jpg", // Adjust based on your API
+          }));
+        if (onFetchBookData && mappedData.length > 0) {
+          onFetchBookData(mappedData); // Pass array of books
         }
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching book data:", error);
+        console.error("Error fetching books:", error);
         setError("Failed to fetch book data");
         setLoading(false);
       });
   };
 
   useEffect(() => {
-    const number = Math.floor(Math.random() * 1934) + 1;
-    fetchBookData(number);
-  }, []); // Run only once on mount
+    fetchBookData();
+  }, []); // Run once on mount
 
   if (loading) {
     return <div>Loading...</div>;
@@ -51,12 +60,11 @@ function RandomNumberComponent({ onFetchBookData }) {
     return <div>{error}</div>;
   }
 
-  return null; // No UI for this component as it just triggers data fetch
+  return null; // No UI, just triggers fetch
 }
 
-// PropTypes validation
 RandomNumberComponent.propTypes = {
-  onFetchBookData: PropTypes.func.isRequired, // Ensure the function is passed and required
+  onFetchBookData: PropTypes.func.isRequired,
 };
 
 export default RandomNumberComponent;

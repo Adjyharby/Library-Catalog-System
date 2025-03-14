@@ -41,39 +41,45 @@ function Library() {
   ];
 
   useEffect(() => {
-    handleFetchBookName();
+    handleFetchBookName(); // Initial fetch on mount
   }, []);
 
-  const handleFetchBookName = () => {
-    const fetchMultipleBooks = async () => {
-      const promises = Array.from({ length: 8 }, () => {
-        const randomId = Math.floor(Math.random() * 24) + 1;
-        return fetch(`http://localhost/API/Catalog.php?CatalogID=${randomId}`)
-          .then((response) => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-          })
-          .catch((error) => {
-            console.error("Error fetching book data:", error);
-            return null;
-          });
-      });
+  const handleFetchBookName = (books) => {
+    if (Array.isArray(books)) {
+      // If called from RandomNumberComponent with an array
+      setRecommendations(books);
+    } else {
+      // Original logic for manual fetch
+      const fetchMultipleBooks = async () => {
+        const promises = Array.from({ length: 8 }, () => {
+          const randomId = Math.floor(Math.random() * 24) + 1; // Adjust range as needed
+          return fetch(`http://localhost/API/Catalog.php?CatalogID=${randomId}`)
+            .then((response) => {
+              if (!response.ok) throw new Error("Network response was not ok");
+              return response.json();
+            })
+            .catch((error) => {
+              console.error("Error fetching book data:", error);
+              return null;
+            });
+        });
 
-      const results = await Promise.all(promises);
-      const validBooks = results
-        .filter((book) => book && book["Book Name"])
-        .map((book) => ({
-          title: book["Book Name"] || "Unknown Title",
-          author: book["AuthorName"] || "Unknown Author",
-          genre: book["Genre"] || "Uncategorized",
-          description: book["ShortDesc"] || "No description available.",
-          img: book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg",
-        }));
+        const results = await Promise.all(promises);
+        const validBooks = results
+          .filter((book) => book && book["Book Name"])
+          .map((book) => ({
+            title: book["Book Name"] || "Unknown Title",
+            author: book["AuthorName"] || "Unknown Author",
+            genre: book["Genre"] || "Uncategorized",
+            description: book["ShortDesc"] || "No description available.",
+            img: book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg",
+          }));
 
-      setRecommendations(validBooks);
-    };
+        setRecommendations(validBooks);
+      };
 
-    fetchMultipleBooks();
+      fetchMultipleBooks();
+    }
   };
 
   const fetchBooks = async () => {
@@ -84,7 +90,6 @@ function Library() {
         `http://localhost/API/Catalog.php?q=${encodeURIComponent(searchQuery)}`
       );
       console.log("Search response:", response.data);
-      // Debug image paths
       response.data.forEach((book) => console.log("ImageDir:", book["ImageDir"]));
       setSearchResults(response.data || []);
     } catch (error) {
@@ -139,7 +144,7 @@ function Library() {
   return (
     <div className="w-full min-h-screen p-4 overflow-auto" style={{ alignItems: "center", justifyContent: "center", paddingTop: "0px" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row  mb-6 relative">
+      <div className="flex flex-col sm:flex-row items-center justify-center mb-6 relative">
         <h1 className="scroll-m-20 text-5xl lg:text-7xl font-extrabold tracking-tight mt-4 sm:mb-0">
           Library
         </h1>
@@ -150,7 +155,7 @@ function Library() {
             size="lg"
             radius="full"
             onPress={handleModalOpen}
-            className="fixed top-4 right-20 z-10 hover:scale-105 transition-transform"
+            className="fixed top-4 right-4 z-10 hover:scale-105 transition-transform"
           >
             <IconSearch size={24} />
           </Button>
@@ -161,8 +166,8 @@ function Library() {
       <Modal
         isOpen={isRegistrationOpen}
         onOpenChange={setRegistrationOpen}
-        backdrop="opaque"
-        size="2xl"
+        backdrop="blur"
+        size="lg"
         className="rounded-lg"
       >
         <ModalContent className="bg-white shadow-lg">
@@ -314,13 +319,13 @@ function Library() {
       {/* Recommendations */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 ">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {recommendations.map((book, index) => (
             <RecommendationCard
               key={index}
               book={book}
               onOpen={openBookModal}
-              className="duration-200 hover:shadow-lg hover:scale-105 transition-transform"
+              className="transition-transform duration-200 hover:scale-105 hover:shadow-lg"
             />
           ))}
         </div>
@@ -434,7 +439,7 @@ function Library() {
         </ModalContent>
       </Modal>
 
-      <RandomNumberComponent onFetchBookName={handleFetchBookName} />
+      <RandomNumberComponent onFetchBookData={handleFetchBookName} />
     </div>
   );
 }
