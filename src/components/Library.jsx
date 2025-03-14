@@ -13,7 +13,7 @@ import {
 } from "@nextui-org/react";
 import axios from "axios";
 import "./library.css";
-import { IconSearch } from "@tabler/icons-react";
+import { IconSearch, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import RecommendationCard from "./RecommendationCard.jsx";
 import RandomNumberComponent from "./RecommendRandom.jsx";
 
@@ -29,12 +29,12 @@ function Library() {
   const [genreResults, setGenreResults] = useState([]);
   const [genreModalOpen, setGenreModalOpen] = useState(false);
 
-  const searchInputRef = useRef(null);
+  const scrollRef = useRef(null); // Ref for the scroll container
 
   // Define all available genres
   const genres = [
-    "Adventure", "Romance", "Comedy", "Drama", "Sci-Fi", "Fantasy", 
-    "Mystery", "Thriller", "Horror", "Biography", "History", "Self-Help", 
+    "Adventure", "Romance", "Comedy", "Drama", "Sci-Fi", "Fantasy",
+    "Mystery", "Thriller", "Horror", "Biography", "History", "Self-Help",
     "Poetry", "Science", "Travel", "Cooking"
   ];
 
@@ -68,14 +68,12 @@ function Library() {
           author: book["AuthorName"] || "Unknown Author",
           genre: book["Genre"] || "Uncategorized",
           description: book["ShortDesc"] || "No description available.",
-          // Use the ImageDir column if available; otherwise use a placeholder.
           img:
             book["ImageDir"] && book["ImageDir"].trim() !== ""
               ? book["ImageDir"]
               : "placeholder.jpg",
         }));
 
-      // Set recommendations to exactly these 8 books
       setRecommendations(validBooks);
     };
 
@@ -117,7 +115,7 @@ function Library() {
     }
   };
 
-  // Open modal with a book's details.
+  // Open modal with a book's details
   const openBookModal = (book) => {
     console.log("Book modal opened with:", book);
     setSelectedBook(book);
@@ -131,8 +129,21 @@ function Library() {
     }, 100);
   };
 
+  // Scroll functions for navigation arrows
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -180, behavior: "smooth" }); // Adjust 180 based on card width
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 180, behavior: "smooth" }); // Adjust 180 based on card width
+    }
+  };
+
   return (
-    <div className="w-full min-h-screen p-4 overflow-auto" style={{alignItems: 'center', justifyContent: 'center', paddingTop: '0px'}}>
+    <div className="w-full min-h-screen p-4 overflow-auto" style={{ alignItems: "center", justifyContent: "center", paddingTop: "0px" }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
         <h1 className="scroll-m-20 text-5xl lg:text-7xl font-extrabold tracking-tight mt-4 sm:mb-0">
@@ -158,8 +169,7 @@ function Library() {
               <ModalHeader>Search for Books</ModalHeader>
               <ModalBody>
                 <div className="w-full px-4">
-                <Input
-                    ref={searchInputRef}
+                  <Input
                     className="w-full"
                     size="lg"
                     placeholder="Search for books, authors, or genres..."
@@ -172,15 +182,14 @@ function Library() {
                       }
                     }}
                   />
-
                   <Button
-                      onPress={fetchBooks}
-                      className="ml-2"
-                      color="primary"
-                      isLoading={loading}
-                    >
-                      Search
-                    </Button>
+                    onPress={fetchBooks}
+                    className="ml-2"
+                    color="primary"
+                    isLoading={loading}
+                  >
+                    Search
+                  </Button>
 
                   <div className="mt-4 w-full">
                     {searchResults.length > 0 ? (
@@ -195,22 +204,18 @@ function Library() {
                               author: book.AuthorName,
                               genre: book.Genre,
                               description:
-                                book["ShortDesc"] ||
-                                "No description available.",
+                                book["ShortDesc"] || "No description available.",
                               img:
-                                book["ImageDir"] &&
-                                book["ImageDir"].trim() !== ""
+                                book["ImageDir"] && book["ImageDir"].trim() !== ""
                                   ? book["ImageDir"]
                                   : "placeholder.jpg",
                             })
                           }
                         >
-
                           <CardHeader className="flex flex-row items-center justify-start w-full">
                             <Image
                               src={
-                                book["ImageDir"] &&
-                                book["ImageDir"].trim() !== ""
+                                book["ImageDir"] && book["ImageDir"].trim() !== ""
                                   ? book["ImageDir"]
                                   : "placeholder.jpg"
                               }
@@ -234,14 +239,11 @@ function Library() {
                         </Card>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-600">
-                        No results found.
-                      </p>
+                      <p className="text-sm text-gray-600">No results found.</p>
                     )}
                   </div>
                 </div>
               </ModalBody>
-
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
@@ -252,45 +254,67 @@ function Library() {
         </ModalContent>
       </Modal>
 
-      {/* Categories - Horizontally Scrollable */}
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-semibold">Categories</h3>
-        <p className="text-xs text-gray-500">Scroll to see more →</p>
-      </div>
-      <div className="relative w-full mb-6">
-        <div className="flex overflow-x-auto pb-4 hide-scrollbar" style={{ scrollSnapType: 'x mandatory' }}>
-          {genres.map((genre, index) => (
-            <div key={index} className="flex-none w-[180px] mr-4" style={{ scrollSnapAlign: 'start' }}>
-              <Card 
-                className="w-full h-[180px] relative hover:scale-105 transition-transform duration-200"
-                isPressable
-                onPress={() => fetchBooksByGenre(genre)}
-              >
-                <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                  <p className="text-xs text-white/60 uppercase font-bold">
-                    What to read
-                  </p>
-                  <h4 className="text-white font-medium text-sm">{genre}</h4>
-                </CardHeader>
-                <Image
-                  removeWrapper
-                  alt={`${genre} genre`}
-                  className="z-0 w-full h-full object-cover"
-                  src="book-bg.jpg"
-                />
-              </Card>
-            </div>
-          ))}
+      {/* Categories Section with Horizontal Scroll */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-semibold">Categories</h3>
         </div>
-        <style jsx>{`
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-          .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-        `}</style>
+        <div className="relative w-full">
+          <Button
+            isIconOnly
+            onPress={scrollLeft}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-gray-200 hover:bg-gray-300"
+          >
+            <IconChevronLeft size={24} />
+          </Button>
+          <div
+            ref={scrollRef}
+            className="flex overflow-x-auto pb-4 hide-scrollbar snap-x snap-mandatory"
+          >
+            {genres.map((genre, index) => (
+              <div key={index} className="flex-none w-[180px] mr-4 snap-start">
+                <Card
+                  className="w-full h-[180px] relative hover:scale-105 transition-transform duration-200"
+                  isPressable
+                  onPress={() => fetchBooksByGenre(genre)}
+                >
+                  <CardHeader className="absolute z-10 top-1 flex-col !items-start">
+                    <p className="text-xs text-white/60 uppercase font-bold">What to read</p>
+                    <h4 className="text-white font-medium text-sm">{genre}</h4>
+                  </CardHeader>
+                  <Image
+                    removeWrapper
+                    alt={`${genre} genre`}
+                    className="z-0 w-full h-full object-cover"
+                    src="book-bg.jpg"
+                  />
+                </Card>
+              </div>
+            ))}
+          </div>
+          <Button
+            isIconOnly
+            onPress={scrollRight}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-gray-200 hover:bg-gray-300"
+          >
+            <IconChevronRight size={24} />
+          </Button>
+          <style jsx>{`
+            .hide-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            .hide-scrollbar {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+            .snap-x {
+              scroll-snap-type: x mandatory;
+            }
+            .snap-start {
+              scroll-snap-align: start;
+            }
+          `}</style>
+        </div>
       </div>
 
       {/* Recommendations */}
@@ -298,57 +322,59 @@ function Library() {
         <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {recommendations.map((book, index) => (
-            <RecommendationCard key={index} book={book} onOpen={openBookModal} className="transition-transform duration-200 hover:scale-105 hover:shadow-lg" />
+            <RecommendationCard
+              key={index}
+              book={book}
+              onOpen={openBookModal}
+              className="transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+            />
           ))}
         </div>
       </div>
 
       {/* Book Detail Modal */}
       <Modal
-  isOpen={isBookOpen}
-  onOpenChange={setBookOpen}
-  backdrop="opaque"
-  size="2xl"
->
-  <ModalContent>
-    {(onClose) => (
-      <>
-        <ModalBody className="p-0">
-          <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-2/5 bg-gradient-to-b from-purple-500 to-blue-500 p-6 flex items-center justify-center">
-              <Image
-                src={selectedBook?.img}
-                alt="Book cover"
-                className="object-contain max-h-64 shadow-xl rounded"
-                width={200}
-                height={300}
-              />
-            </div>
-            <div className="w-full md:w-3/5 p-6">
-              <h2 className="text-2xl font-bold mb-2">{selectedBook?.title}</h2>
-              <p className="text-gray-500 mb-4">by {selectedBook?.author}</p>
-              
-              <div className="mb-4">
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
-                  {selectedBook?.genre}
-                </span>
-              </div>
-              
-              <h3 className="text-lg font-semibold mb-2">About this book</h3>
-              <p className="text-gray-700 mb-6">{selectedBook?.description}</p>
-              
-              <div className="flex justify-end">
-                <Button color="primary" variant="flat" onPress={onClose}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </ModalBody>
-      </>
-    )}
-  </ModalContent>
-</Modal>
+        isOpen={isBookOpen}
+        onOpenChange={setBookOpen}
+        backdrop="opaque"
+        size="2xl"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalBody className="p-0">
+                <div className="flex flex-col md:flex-row">
+                  <div className="w-full md:w-2/5 bg-gradient-to-b from-purple-500 to-blue-500 p-6 flex items-center justify-center">
+                    <Image
+                      src={selectedBook?.img}
+                      alt="Book cover"
+                      className="object-contain max-h-64 shadow-xl rounded"
+                      width={200}
+                      height={300}
+                    />
+                  </div>
+                  <div className="w-full md:w-3/5 p-6">
+                    <h2 className="text-2xl font-bold mb-2">{selectedBook?.title}</h2>
+                    <p className="text-gray-500 mb-4">by {selectedBook?.author}</p>
+                    <div className="mb-4">
+                      <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
+                        {selectedBook?.genre}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">About this book</h3>
+                    <p className="text-gray-700 mb-6">{selectedBook?.description}</p>
+                    <div className="flex justify-end">
+                      <Button color="primary" variant="flat" onPress={onClose}>
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* Genre Results Modal */}
       <Modal
