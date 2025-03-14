@@ -9,11 +9,13 @@ import {
   ModalFooter,
   Card,
   CardHeader,
+  CardBody,
   Image,
 } from "@nextui-org/react";
 import axios from "axios";
 import "./library.css";
 import { IconSearch, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { Tooltip } from "@nextui-org/react";
 import RecommendationCard from "./RecommendationCard.jsx";
 import RandomNumberComponent from "./RecommendRandom.jsx";
 
@@ -29,21 +31,19 @@ function Library() {
   const [genreResults, setGenreResults] = useState([]);
   const [genreModalOpen, setGenreModalOpen] = useState(false);
 
-  const scrollRef = useRef(null); // Ref for the scroll container
+  const scrollRef = useRef(null);
+  const searchInputRef = useRef(null);
 
-  // Define all available genres
   const genres = [
     "Adventure", "Romance", "Comedy", "Drama", "Sci-Fi", "Fantasy",
     "Mystery", "Thriller", "Horror", "Biography", "History", "Self-Help",
     "Poetry", "Science", "Travel", "Cooking"
   ];
 
-  // Fetch data from API on load
   useEffect(() => {
-    handleFetchBookName(); // Fetch initial recommendations on component mount
+    handleFetchBookName();
   }, []);
 
-  // Fetch exactly 8 random books for recommendations
   const handleFetchBookName = () => {
     const fetchMultipleBooks = async () => {
       const promises = Array.from({ length: 8 }, () => {
@@ -60,7 +60,6 @@ function Library() {
       });
 
       const results = await Promise.all(promises);
-
       const validBooks = results
         .filter((book) => book && book["Book Name"])
         .map((book) => ({
@@ -68,10 +67,7 @@ function Library() {
           author: book["AuthorName"] || "Unknown Author",
           genre: book["Genre"] || "Uncategorized",
           description: book["ShortDesc"] || "No description available.",
-          img:
-            book["ImageDir"] && book["ImageDir"].trim() !== ""
-              ? book["ImageDir"]
-              : "placeholder.jpg",
+          img: book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg",
         }));
 
       setRecommendations(validBooks);
@@ -80,7 +76,6 @@ function Library() {
     fetchMultipleBooks();
   };
 
-  // Search books using query
   const fetchBooks = async () => {
     if (!searchQuery) return;
     setLoading(true);
@@ -89,6 +84,8 @@ function Library() {
         `http://localhost/API/Catalog.php?q=${encodeURIComponent(searchQuery)}`
       );
       console.log("Search response:", response.data);
+      // Debug image paths
+      response.data.forEach((book) => console.log("ImageDir:", book["ImageDir"]));
       setSearchResults(response.data || []);
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -97,7 +94,6 @@ function Library() {
     }
   };
 
-  // Fetch books by genre
   const fetchBooksByGenre = async (genre) => {
     setLoading(true);
     setActiveGenre(genre);
@@ -115,7 +111,6 @@ function Library() {
     }
   };
 
-  // Open modal with a book's details
   const openBookModal = (book) => {
     console.log("Book modal opened with:", book);
     setSelectedBook(book);
@@ -129,30 +124,37 @@ function Library() {
     }, 100);
   };
 
-  // Scroll functions for navigation arrows
   const scrollLeft = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -180, behavior: "smooth" }); // Adjust 180 based on card width
+      scrollRef.current.scrollBy({ left: -180, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 180, behavior: "smooth" }); // Adjust 180 based on card width
+      scrollRef.current.scrollBy({ left: 180, behavior: "smooth" });
     }
   };
 
   return (
     <div className="w-full min-h-screen p-4 overflow-auto" style={{ alignItems: "center", justifyContent: "center", paddingTop: "0px" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row  mb-6 relative">
         <h1 className="scroll-m-20 text-5xl lg:text-7xl font-extrabold tracking-tight mt-4 sm:mb-0">
           Library
         </h1>
-        <Button onPress={handleModalOpen} className="w-full sm:w-auto px-4 h-10">
-          <IconSearch />
-          Tap to search....
-        </Button>
+        <Tooltip content="Search Books" placement="bottom">
+          <Button
+            isIconOnly
+            color="primary"
+            size="lg"
+            radius="full"
+            onPress={handleModalOpen}
+            className="fixed top-4 right-20 z-10 hover:scale-105 transition-transform"
+          >
+            <IconSearch size={24} />
+          </Button>
+        </Tooltip>
       </div>
 
       {/* Search Modal */}
@@ -160,91 +162,83 @@ function Library() {
         isOpen={isRegistrationOpen}
         onOpenChange={setRegistrationOpen}
         backdrop="opaque"
-        size="3xl"
-        scrollBehavior="inside"
+        size="2xl"
+        className="rounded-lg"
       >
-        <ModalContent>
+        <ModalContent className="bg-white shadow-lg">
           {(onClose) => (
             <>
-              <ModalHeader>Search for Books</ModalHeader>
-              <ModalBody>
-                <div className="w-full px-4">
+              <ModalHeader className="text-2xl font-semibold bg-gray-100 p-4 rounded-t-lg">
+                Search for Books
+              </ModalHeader>
+              <ModalBody className="p-6">
+                <div className="flex gap-2">
                   <Input
-                    className="w-full"
+                    ref={searchInputRef}
                     size="lg"
-                    placeholder="Search for books, authors, or genres..."
-                    startContent={<IconSearch size={18} />}
+                    placeholder="Search books, authors, or genres..."
+                    startContent={<IconSearch size={20} />}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        fetchBooks();
-                      }
-                    }}
+                    onKeyDown={(e) => e.key === "Enter" && fetchBooks()}
+                    className="w-full rounded-lg shadow-sm"
+                    isClearable
+                    onClear={() => setSearchQuery("")}
                   />
                   <Button
                     onPress={fetchBooks}
-                    className="ml-2"
                     color="primary"
                     isLoading={loading}
+                    size="lg"
+                    className="rounded-lg"
                   >
                     Search
                   </Button>
-
-                  <div className="mt-4 w-full">
-                    {searchResults.length > 0 ? (
-                      searchResults.map((book, index) => (
-                        <Card
-                          key={book.CatalogID || index}
-                          className="w-full mb-4"
-                          isPressable
-                          onPress={() =>
-                            openBookModal({
-                              title: book["Book Name"],
-                              author: book.AuthorName,
-                              genre: book.Genre,
-                              description:
-                                book["ShortDesc"] || "No description available.",
-                              img:
-                                book["ImageDir"] && book["ImageDir"].trim() !== ""
-                                  ? book["ImageDir"]
-                                  : "placeholder.jpg",
-                            })
-                          }
-                        >
-                          <CardHeader className="flex flex-row items-center justify-start w-full">
-                            <Image
-                              src={
-                                book["ImageDir"] && book["ImageDir"].trim() !== ""
-                                  ? book["ImageDir"]
-                                  : "placeholder.jpg"
-                              }
-                              alt={book["Book Name"]}
-                              width={75}
-                              height={75}
-                              className="object-contain"
-                            />
-                            <div className="flex flex-col justify-center ml-4 text-left">
-                              <div className="flex items-center">
-                                <small className="capitalize">
-                                  {book.Genre || "Uncategorized"}
-                                </small>
-                                <span className="mx-2">|</span>
-                                <strong>
-                                  {book["Book Name"]} by {book.AuthorName}
-                                </strong>
-                              </div>
-                            </div>
-                          </CardHeader>
-                        </Card>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-600">No results found.</p>
-                    )}
-                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((book, index) => (
+                      <Card
+                        key={book.CatalogID || index}
+                        isPressable
+                        onPress={() =>
+                          openBookModal({
+                            title: book["Book Name"],
+                            author: book.AuthorName,
+                            genre: book.Genre,
+                            description: book["ShortDesc"] || "No description available.",
+                            img: book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg",
+                          })
+                        }
+                        className="hover:shadow-md transition-shadow w-full"
+                      >
+                        <CardHeader className="flex items-center gap-4 p-4">
+                          <Image
+                            src={book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg"}
+                            alt={book["Book Name"] || "Book cover"}
+                            width={80}
+                            height={80}
+                            className="object-contain rounded-md"
+                          />
+                          <div className="flex flex-col">
+                            <p className="font-semibold text-lg">{book["Book Name"] || "Unknown Title"}</p>
+                            <p className="text-sm text-gray-600">{book.AuthorName || "Unknown Author"}</p>
+                          </div>
+                        </CardHeader>
+                        <CardBody className="p-4 pt-0">
+                          <p className="text-sm text-gray-500">{book.Genre || "Uncategorized"}</p>
+                          <p className="text-sm text-gray-700 mt-1">
+                            {book["ShortDesc"] ? book["ShortDesc"].substring(0, 100) + "..." : "No description available."}
+                          </p>
+                        </CardBody>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 col-span-full text-center">No results found.</p>
+                  )}
                 </div>
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="border-t border-gray-200 p-4">
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
@@ -320,13 +314,13 @@ function Library() {
       {/* Recommendations */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 ">
           {recommendations.map((book, index) => (
             <RecommendationCard
               key={index}
               book={book}
               onOpen={openBookModal}
-              className="transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+              className="duration-200 hover:shadow-lg hover:scale-105 transition-transform"
             />
           ))}
         </div>
@@ -401,22 +395,14 @@ function Library() {
                             title: book["Book Name"],
                             author: book.AuthorName,
                             genre: book.Genre,
-                            description:
-                              book["ShortDesc"] || "No description available.",
-                            img:
-                              book["ImageDir"] && book["ImageDir"].trim() !== ""
-                                ? book["ImageDir"]
-                                : "placeholder.jpg",
+                            description: book["ShortDesc"] || "No description available.",
+                            img: book["ImageDir"] && book["ImageDir"].trim() !== "" ? book["ImageDir"] : "/placeholder.jpg",
                           })
                         }
                       >
                         <CardHeader className="flex flex-row items-center justify-start w-full">
                           <Image
-                            src={
-                              book["ImageDir"] && book["ImageDir"].trim() !== ""
-                                ? book["ImageDir"]
-                                : "placeholder.jpg"
-                            }
+                            src={book["ImageDir"] || "/placeholder.jpg"}
                             alt={book["Book Name"]}
                             width={75}
                             height={75}
@@ -424,14 +410,10 @@ function Library() {
                           />
                           <div className="flex flex-col justify-center ml-4 text-left">
                             <div className="flex items-center">
-                              <strong>
-                                {book["Book Name"]} by {book.AuthorName}
-                              </strong>
+                              <strong>{book["Book Name"]} by {book.AuthorName}</strong>
                             </div>
                             <p className="text-sm mt-1">
-                              {book["ShortDesc"]
-                                ? book["ShortDesc"].substring(0, 100) + "..."
-                                : "No description available."}
+                              {book["ShortDesc"] ? book["ShortDesc"].substring(0, 100) + "..." : "No description available."}
                             </p>
                           </div>
                         </CardHeader>
