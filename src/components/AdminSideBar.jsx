@@ -1,6 +1,5 @@
 
 import PropTypes from "prop-types";
-import PropTypes from 'prop-types';
 import { useState } from "react";
 import {
   IconLayoutSidebarLeftCollapse,
@@ -88,7 +87,7 @@ function Sidebar({ onSelectPage }) {
 
         <button onClick={() => onSelectPage("Help")} className="functions">
           <img src="/help.png" alt="Help icon" />
-          {!collapsed && <div className="components">Help</div>}
+          {!collapsed && <div className="components">Heeeeelp</div>}
         </button>
 
         <Popover showArrow backdrop="transparent" placement="right">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
+import AdminSideBar from "./components/AdminSideBar";
 import Body from "./components/Body";
 import Library from "./components/Library";
 import Registration from "./components/Registration";
@@ -11,7 +12,8 @@ import "./App.css";
 function Main() {
   const [selectedPage, setSelectedPage] = useState("Library");
 
-  const renderSelectedPage = () => {
+  const renderContent = () => {
+    // When in admin mode, render the AdminReg component as main content.
     switch (selectedPage) {
       case "Library":
         return <Library />;
@@ -21,7 +23,7 @@ function Main() {
         return <About />;
       case "Help":
         return <Help />;
-      case "AdminReg":
+      case "Admin":
         return <AdminReg />;
       default:
         return <Library />;
@@ -29,8 +31,13 @@ function Main() {
   };
 
   return (
-    <div className="main-container h-screen flex flex-col sm:flex-row overflow-hidden">
-      <Sidebar onSelectPage={setSelectedPage} className="h-full" />
+    <div className="main-container h-screen flex overflow-hidden">
+      {/* Render different sidebar components based on the selected page */}
+      {selectedPage === "Admin" ? (
+        <AdminSideBar />
+      ) : (
+        <Sidebar onSelectPage={setSelectedPage} />
+      )}
       <Body className="h-full flex-1">
         <div
           style={{
@@ -40,11 +47,11 @@ function Main() {
             width: "100%",
             height: "100%",
             padding: "20px",
-            paddingTop:'0px',
+            paddingTop: "0px",
             boxSizing: "border-box",
           }}
         >
-          {renderSelectedPage()}
+          {renderContent()}
         </div>
       </Body>
     </div>
