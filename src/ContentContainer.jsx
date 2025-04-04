@@ -7,6 +7,9 @@ import Registration from "./components/Registration";
 import About from "./components/About";
 import Help from "./components/Help";
 import AdminReg from "./components/AdminReg";
+import AdminLib from "./components/AdminLib";
+import AdminHelp from "./components/AdminHelp"
+import Accounts from "./components/Accounts";
 import "./App.css";
 
 function Main() {
@@ -23,8 +26,17 @@ function Main() {
         return <About />;
       case "Help":
         return <Help />;
-      case "Admin":
-        return <AdminReg />;
+        case "AdminReg":
+            return <AdminReg/>;
+            case "AdminHelp":
+              return <AdminHelp/>;
+      case "AdminLib":
+        return <AdminLib/>;
+        case "Accounts":
+        return <Accounts />;
+        case "Logout":
+          return <Library />;
+  
       default:
         return <Library />;
     }
@@ -34,7 +46,7 @@ function Main() {
     <div className="main-container h-screen flex overflow-hidden">
       {/* Render different sidebar components based on the selected page */}
       {selectedPage === "Admin" ? (
-        <AdminSideBar />
+        <AdminSideBar onSelectPage={setSelectedPage}/>
       ) : (
         <Sidebar onSelectPage={setSelectedPage} />
       )}
