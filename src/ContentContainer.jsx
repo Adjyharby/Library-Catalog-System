@@ -45,7 +45,7 @@ function Main() {
   return (
     <div className="main-container h-screen flex overflow-hidden">
       {/* Render different sidebar components based on the selected page */}
-      {selectedPage === "Admin" ? (
+      {selectedPage === "Admin" ||selectedPage === "AdminLib" || selectedPage === "AdminReg" || selectedPage === "AdminHelp" || selectedPage === "Accounts"? (
         <AdminSideBar onSelectPage={setSelectedPage}/>
       ) : (
         <Sidebar onSelectPage={setSelectedPage} />
