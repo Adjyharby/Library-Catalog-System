@@ -368,6 +368,29 @@ export default function AdminReg() {
         </Modal>
       </div>
 
+      <div className="export-controls mb-4">
+        <h2 className="mb-2 ">Export file</h2>
+        <div className="flex items-center gap-4">
+          <Input
+            type="date"
+            label="Filter by Date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="max-w-xs h-10"
+          />
+          <Input
+            type="text"
+            label="Filter by Department"
+            placeholder="Enter department"
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="max-w-xs h-10"
+          />
+          <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
+            Export as Excel
+          </Button>
+        </div>
+      </div>
       <Table
         aria-label="Example table with single selection"
         onSelectionChange={handleSelectionChange}
@@ -450,29 +473,7 @@ export default function AdminReg() {
         </TableBody>
       </Table>
 
-      <div className="export-controls mb-4">
-        <h2 className="mb-2 ">Export file</h2>
-        <div className="flex items-center gap-4">
-          <Input
-            type="date"
-            label="Filter by Date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="max-w-xs h-10"
-          />
-          <Input
-            type="text"
-            label="Filter by Department"
-            placeholder="Enter department"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className="max-w-xs h-10"
-          />
-          <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
-            Export as Excel
-          </Button>
-        </div>
-      </div>
+
     </div>
   );
 }

@@ -32,7 +32,7 @@ import { Time } from "@internationalized/date";
 import "./reg.css";
 import DateDisplay from "./DateDisplay.jsx";
 import Clock from "./Clock.jsx";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
 
 function Registration() {
   const [items, setItems] = useState([]);
@@ -50,18 +50,18 @@ function Registration() {
   const [eventDate, setEventDate] = useState(new CalendarDate(2024, 4, 4));
   const [eventTime, setEventTime] = useState(new Time(11, 45));
 
-  const [filterDate, setFilterDate] = useState("");
-  const [filterDepartment, setFilterDepartment] = useState("");
+  // const [filterDate, setFilterDate] = useState("");
+  // const [filterDepartment, setFilterDepartment] = useState("");
 
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchDate = filterDate ? item.Date === filterDate : true;
-      const matchDept = filterDepartment
-        ? item.Dept.toLowerCase().includes(filterDepartment.toLowerCase())
-        : true;
-      return matchDate && matchDept;
-    });
-  }, [items, filterDate, filterDepartment]);
+  // const filteredItems = useMemo(() => {
+  //   return items.filter((item) => {
+  //     const matchDate = filterDate ? item.Date === filterDate : true;
+  //     const matchDept = filterDepartment
+  //       ? item.Dept.toLowerCase().includes(filterDepartment.toLowerCase())
+  //       : true;
+  //     return matchDate && matchDept;
+  //   });
+  // }, [items, filterDate, filterDepartment]);
 
   const fetchData = async () => {
     try {
@@ -176,12 +176,12 @@ function Registration() {
     );
   }, [name, age, gender, yearLevel, course, purpose]);
 
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filteredItems);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
-    XLSX.writeFile(workbook, "attendance.xlsx");
-  };
+  // const exportToExcel = () => {
+  //   const worksheet = XLSX.utils.json_to_sheet(filteredItems);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+  //   XLSX.writeFile(workbook, "attendance.xlsx");
+  // };
 
   const genderOptions = [
     { key: "Male", label: "Male" },
@@ -450,7 +450,7 @@ function Registration() {
         </TableBody>
       </Table>
 
-      <div className="export-controls mb-4">
+      {/* <div className="export-controls mb-4">
         <h2 className="mb-2 ">Export file</h2>
         <div className="flex items-center gap-4">
           <Input
@@ -468,12 +468,12 @@ function Registration() {
             onChange={(e) => setFilterDepartment(e.target.value)}
             className="max-w-xs h-10"
           />
-          <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
+          {/* <Button onPress={exportToExcel} color="secondary" className="h-10 mt-0">
             Export as Excel
-          </Button>
+          </Button> */}
         </div>
-      </div>
-    </div>
+    //   </div> 
+    // </div>
   );
 }
 
