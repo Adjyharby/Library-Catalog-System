@@ -26,32 +26,11 @@ export default function AdminHelp() {
         <Button
           onPress={() => setRegistrationOpen(true)}
           className="col-span-1 p-32 "
-          style={{height:"32.15rem",}}
+          style={{height:"35.50rem",}}
         >
           Admin Help
         </Button>
-        <Button
-          onPress={() => setLibraryOpen(true)}
-          className="col-span-2 p-32 "
-          style={{height:"32.15rem", backgroundColor:'#57429D'}}
-        >
-          Library Help 
-        </Button>
-        <Button
-          onPress={() => setAccountOpen(true)}
-          className="col-span-2 p-32"
-          style={{height:"32.15rem", backgroundColor:'#ffc683'}}
-
-        >
-          Registration Help
-        </Button>
         
-        {/* <Button
-          onPress={() => setGeneralOpen(true)}
-          className="col-span-1 p-28"
-        >
-          More Help
-        </Button> */}
 
         {/* Registration Help Modal */}
         <Modal
@@ -63,81 +42,9 @@ export default function AdminHelp() {
           <ModalContent>
             {(onClose) => (
               <>
-                <ModalHeader>Registration Help</ModalHeader>
+                <ModalHeader>Admin Help</ModalHeader>
                 <ModalBody>
-                  <p>Here’s information to help with registration...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* Library Help Modal */}
-        <Modal
-          isOpen={isLibraryOpen}
-          onOpenChange={setLibraryOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>Library Help</ModalHeader>
-                <ModalBody>
-                  <p>Information about using the library...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* Account Help Modal */}
-        <Modal
-          isOpen={isAccountOpen}
-          onOpenChange={setAccountOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>Registration Help</ModalHeader>
-                <ModalBody>
-                  <p>Instructions on managing your account...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* General Help Modal */}
-        <Modal
-          isOpen={isGeneralOpen}
-          onOpenChange={setGeneralOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>General Help</ModalHeader>
-                <ModalBody>
-                  <p>General information and FAQ...</p>
+                  <p>Here’s information to help with Admin...</p>
                 </ModalBody>
                 <ModalFooter>
                   <Button color="danger" variant="light" onPress={onClose}>

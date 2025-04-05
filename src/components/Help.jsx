@@ -9,7 +9,6 @@ import {
 } from "@nextui-org/react";
 
 function Help() {
-  // Define separate states for each modal
   const [isRegistrationOpen, setRegistrationOpen] = useState(false);
   const [isLibraryOpen, setLibraryOpen] = useState(false);
   const [isAccountOpen, setAccountOpen] = useState(false);
@@ -21,134 +20,88 @@ function Help() {
         Help, how it works
       </h1>
 
-      <div className="flex grid-cols-3 gap-10 m-20" >
-        {/* Buttons to open respective modals */}
-        <Button
-          onPress={() => setRegistrationOpen(true)}
-          className="col-span-1 p-32 "
-          style={{height:"32.15rem",}}
-        >
-          Admin Help
-        </Button>
+      {/* Flex container with equal width buttons */}
+      <div className="flex gap-10 m-20">
+        {/* Library Help */}
         <Button
           onPress={() => setLibraryOpen(true)}
-          className="col-span-2 p-32 "
-          style={{height:"32.15rem", backgroundColor:'#57429D'}}
+          className="flex-1 h-[35.50rem] text-white text-2xl"
+          style={{ 
+            backgroundColor: '#57429D',
+            backgroundImage:'url("/book5.png")',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '95% 95%', // you can try 'cover' too
+            backgroundPosition: '10px 130px',
+          }}
         >
-          Library Help 
+          Library Help
         </Button>
+
+        {/* Registration Help */}
         <Button
           onPress={() => setAccountOpen(true)}
-          className="col-span-2 p-32"
-          style={{height:"32.15rem", backgroundColor:'#ffc683'}}
+          className="flex-1 h-[35.50rem] text-black text-2xl"
+          style={{ 
+            backgroundColor: '#ffc683',
+            backgroundImage:'url("/book6.png")',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '45%, 45%', // you can try 'cover' too
+            backgroundPosition: '400px 100px' // 20px from left, 30px from top
 
+          }}
         >
           Registration Help
         </Button>
-        
-        {/* <Button
-          onPress={() => setGeneralOpen(true)}
-          className="col-span-1 p-28"
-        >
-          More Help
-        </Button> */}
-
-        {/* Registration Help Modal */}
-        <Modal
-          isOpen={isRegistrationOpen}
-          onOpenChange={setRegistrationOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>Registration Help</ModalHeader>
-                <ModalBody>
-                  <p>Here’s information to help with registration...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* Library Help Modal */}
-        <Modal
-          isOpen={isLibraryOpen}
-          onOpenChange={setLibraryOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>Library Help</ModalHeader>
-                <ModalBody>
-                  <p>Information about using the library...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* Account Help Modal */}
-        <Modal
-          isOpen={isAccountOpen}
-          onOpenChange={setAccountOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>Registration Help</ModalHeader>
-                <ModalBody>
-                  <p>Instructions on managing your account...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-
-        {/* General Help Modal */}
-        <Modal
-          isOpen={isGeneralOpen}
-          onOpenChange={setGeneralOpen}
-          backdrop="opaque"
-          size="3xl"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader>General Help</ModalHeader>
-                <ModalBody>
-                  <p>General information and FAQ...</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
       </div>
+
+      {/* Library Help Modal */}
+      <Modal
+        isOpen={isLibraryOpen}
+        onOpenChange={setLibraryOpen}
+        backdrop="opaque"
+        size="3xl"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Library Help</ModalHeader>
+              <ModalBody>
+                <p>Information about using the library...</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Registration Help Modal */}
+      <Modal
+        isOpen={isAccountOpen}
+        onOpenChange={setAccountOpen}
+        backdrop="opaque"
+        size="3xl"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Registration Help</ModalHeader>
+              <ModalBody>
+                <p>Instructions on managing your account...</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      
     </div>
   );
 }
