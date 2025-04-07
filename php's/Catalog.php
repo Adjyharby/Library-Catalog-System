@@ -26,7 +26,7 @@ if (isset($_GET['CatalogID'])) {
 // Fetch books by genre
 elseif (isset($_GET['genre'])) {
     $genre = mysqli_real_escape_string($conn, $_GET['genre']);
-    $genreQuery = "SELECT * FROM catalog WHERE Genre LIKE '%$genre%'";
+    $genreQuery = "SELECT * FROM catalog WHERE Genre LIKE '%$genre%' ORDER BY CatalogID DESC";
     $data = mysqli_query($conn, $genreQuery);
     $results = [];
     while ($row = mysqli_fetch_assoc($data)) {
@@ -40,7 +40,8 @@ elseif (isset($_GET['q'])) {
     $searchQuery = "SELECT * FROM catalog 
                     WHERE `Book Name` LIKE '%$search%' 
                        OR `ShortDesc` LIKE '%$search%' 
-                       OR AuthorName LIKE '%$search%'";
+                       OR AuthorName LIKE '%$search%' 
+                    ORDER BY CatalogID DESC";
     $data = mysqli_query($conn, $searchQuery);
     $results = [];
     while ($row = mysqli_fetch_assoc($data)) {
@@ -98,9 +99,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         echo json_encode(['error' => mysqli_error($conn)]);
     }
 }
-// Fetch all books
+// Fetch all books (sorted by CatalogID DESC)
 else {
-    $data = mysqli_query($conn, "SELECT * FROM catalog");
+    $data = mysqli_query($conn, "SELECT * FROM catalog ORDER BY CatalogID DESC");
     $results = [];
     while ($row = mysqli_fetch_assoc($data)) {
         $results[] = array_map(function($value) { return $value === null ? "" : $value; }, $row);

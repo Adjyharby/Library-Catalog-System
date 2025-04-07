@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "./AdminLib.css";
-import { Button, Input } from "@nextui-org/react";
-import { IconSearch } from "@tabler/icons-react";
+import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { IconSearch, IconDotsVertical } from "@tabler/icons-react";
 import {
   Table,
   TableHeader,
@@ -13,13 +13,12 @@ import {
 } from "@nextui-org/react";
 
 export default function AdminLib() {
-  const [items, setItems] = useState([]); // Books from DB
+  const [items, setItems] = useState([]);
   const [selectedKey, setSelectedKey] = useState(null);
   const [page, setPage] = useState(1);
   const rowsPerPage = 6;
   const pages = Math.ceil(items.length / rowsPerPage);
 
-  // Fetch all books from Catalog.php
   useEffect(() => {
     const fetchBooks = async () => {
       try {
@@ -29,7 +28,7 @@ export default function AdminLib() {
         setItems(data);
       } catch (error) {
         console.error("Error fetching books:", error);
-        setItems([]); // Fallback to empty array on error
+        setItems([]);
       }
     };
     fetchBooks();
@@ -44,6 +43,12 @@ export default function AdminLib() {
   const handleSelectionChange = (key) => {
     setSelectedKey(key);
     console.log("Selected book:", key);
+  };
+
+  const formatGenres = (genreString) => {
+    if (!genreString) return "N/A";
+    const genres = genreString.split(/,\s*/);
+    return genres.length > 1 ? genres.join(", ") : genres[0];
   };
 
   return (
@@ -107,10 +112,13 @@ export default function AdminLib() {
           <TableHeader>
             <TableColumn className="table-header" key="CatalogID">ID</TableColumn>
             <TableColumn className="table-header" key="Book Name">TITLE</TableColumn>
-            <TableColumn className="table-header" key="AuthorName">AUTHOR</TableColumn>
+            <TableColumn className="table-header" key="NameOfAuthor">AUTHOR</TableColumn>
             <TableColumn className="table-header" key="Genre">GENRE</TableColumn>
             <TableColumn className="table-header" key="ShortDesc">DESCRIPTION</TableColumn>
-            <TableColumn className="table-header" key="Actions">ACTIONS</TableColumn>
+            <TableColumn className="table-header" key="Status">STATUS</TableColumn>
+            <TableColumn className="table-header" key="PublisherName">PUBLISHER</TableColumn>
+            <TableColumn className="table-header" key="DateOfPublish">DATE PUBLISHED</TableColumn>
+            <TableColumn className="table-header" key="options" width="50"> </TableColumn>
           </TableHeader>
           <TableBody items={paginatedItems}>
             {(item) => (
@@ -124,25 +132,33 @@ export default function AdminLib() {
               >
                 {(columnKey) => (
                   <TableCell className="table-cell">
-                    {columnKey === "Actions" ? (
-                      <div className="action-buttons">
-                        <Button
-                          size="sm"
-                          color="primary"
-                          onPress={() => console.log("Edit", item.CatalogID)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          color="danger"
-                          onPress={() => console.log("Delete", item.CatalogID)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
+                    {columnKey === "options" ? (
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <Button isIconOnly variant="light" size="sm">
+                            <IconDotsVertical size={20} />
+                          </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Book actions">
+                          <DropdownItem
+                            key="edit"
+                            onPress={() => console.log("Edit", item.CatalogID)}
+                          >
+                            Edit
+                          </DropdownItem>
+                          <DropdownItem
+                            key="delete"
+                            color="danger"
+                            onPress={() => console.log("Delete", item.CatalogID)}
+                          >
+                            Delete
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    ) : columnKey === "Genre" ? (
+                      formatGenres(item[columnKey])
                     ) : columnKey === "ShortDesc" ? (
-                      item[columnKey]?.substring(0, 50) + "..." || "N/A" // Truncate description
+                      item[columnKey]?.substring(0, 50) + "..." || "N/A"
                     ) : (
                       item[columnKey] || "N/A"
                     )}
