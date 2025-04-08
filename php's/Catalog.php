@@ -23,7 +23,7 @@ if (isset($_GET['CatalogID'])) {
         echo json_encode(['error' => 'Book not found']);
     }
 }
-// Fetch books by type (search by type)
+// Fetch books by type (if needed)
 elseif (isset($_GET['type'])) {
     $type = mysqli_real_escape_string($conn, $_GET['type']);
     $typeQuery = "SELECT * FROM catalog WHERE Type LIKE '%$type%' ORDER BY CatalogID DESC";
@@ -34,7 +34,7 @@ elseif (isset($_GET['type'])) {
     }
     echo json_encode($results);
 }
-// Fetch books by search query (searching in Book Name, ShortDesc, or AuthorName)
+// Fetch books by search query
 elseif (isset($_GET['q'])) {
     $search = mysqli_real_escape_string($conn, $_GET['q']);
     $searchQuery = "SELECT * FROM catalog 
@@ -64,7 +64,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ssid        = mysqli_real_escape_string($conn, $data['SSID'] ?? '');
     $dateModified= mysqli_real_escape_string($conn, $data['DateModified'] ?? date('Y-m-d H:i:s'));
 
-    // BookID and AdminID are left as null in the insert statement
+    // BookID and AdminID remain NULL by default
     $query = "INSERT INTO catalog (`Book Name`, AuthorName, Type, ShortDesc, ImageDir, Status, PublisherName, DateOfPublish, Quantity, SSID, DateModified) 
               VALUES ('$title', '$author', '$type', '$desc', '$img', '$status', '$publisher', '$publishDate', $quantity, '$ssid', '$dateModified')";
     
@@ -111,6 +111,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
 }
 // Delete a book (DELETE)
+// Note: We removed the extra header from the fetch() call so that CatalogID is available via $_GET.
 elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     if (isset($_GET['CatalogID'])) {
         $id = (int) $_GET['CatalogID'];
@@ -124,7 +125,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         echo json_encode(['error' => 'CatalogID is required']);
     }
 }
-// Fetch all books (sorted by CatalogID DESC)
+// Fetch all books (default)
 else {
     $data = mysqli_query($conn, "SELECT * FROM catalog ORDER BY CatalogID DESC");
     $results = [];

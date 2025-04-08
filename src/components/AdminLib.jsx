@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./AdminLib.css";
 import {
   Button,
@@ -11,7 +11,7 @@ import {
   Autocomplete,
   AutocompleteItem,
 } from "@nextui-org/react";
-import { IconSearch,  IconTrash, IconEdit } from "@tabler/icons-react";
+import { IconSearch, IconTrash, IconEdit } from "@tabler/icons-react";
 import {
   Table,
   TableHeader,
@@ -27,7 +27,8 @@ export default function AdminLib() {
   const [selectedKey, setSelectedKey] = useState(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Track if editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const rowsPerPage = 6;
   const pages = Math.ceil(items.length / rowsPerPage);
 
@@ -42,7 +43,7 @@ export default function AdminLib() {
   const [dateOfPublish, setDateOfPublish] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [ssid, setSsid] = useState("");
-  const [editCatalogID, setEditCatalogID] = useState(null); // Store the ID being edited
+  const [editCatalogID, setEditCatalogID] = useState(null);
 
   // Autocomplete options for Status
   const statusOptions = [
@@ -50,19 +51,40 @@ export default function AdminLib() {
     { key: "Unavailable", label: "Unavailable" },
   ];
 
+  // Fetch all books (called on mount or when search is cleared)
+  const fetchAllBooks = async () => {
+    try {
+      const response = await fetch("http://localhost/API/Catalog.php");
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      setItems([]);
+    }
+  };
+
+  // Fetch books based on search query
+  const handleSearch = async () => {
+    if (!searchQuery) {
+      fetchAllBooks();
+      return;
+    }
+    try {
+      const response = await fetch(
+        `http://localhost/API/Catalog.php?q=${encodeURIComponent(searchQuery)}`
+      );
+      if (!response.ok) throw new Error("Search network response was not ok");
+      const data = await response.json();
+      setItems(data || []);
+      setPage(1); // reset pagination
+    } catch (error) {
+      console.error("Error during search:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await fetch("http://localhost/API/Catalog.php");
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        setItems(data);
-      } catch (error) {
-        console.error("Error fetching books:", error);
-        setItems([]);
-      }
-    };
-    fetchBooks();
+    fetchAllBooks();
   }, []);
 
   const paginatedItems = useMemo(() => {
@@ -75,12 +97,10 @@ export default function AdminLib() {
     setSelectedKey(key);
   };
 
-  // Function to shorten descriptions
   const formatShortDesc = (desc) => {
     return desc && desc.length > 50 ? desc.substring(0, 50) + "..." : desc || "N/A";
   };
 
-  // Form validation: require Book Name, AuthorName, Type, and ShortDesc
   const isFormValid = bookName && authorName && type && shortDesc;
 
   // Handle Add Book submission
@@ -96,8 +116,7 @@ export default function AdminLib() {
       DateOfPublish: dateOfPublish || "0000-00-00",
       Quantity: quantity,
       SSID: ssid,
-      DateModified: new Date().toISOString().slice(0, 19).replace('T', ' ')
-      // BookID and AdminID are omitted so that they remain null
+      DateModified: new Date().toISOString().slice(0, 19).replace("T", " "),
     };
 
     try {
@@ -136,7 +155,7 @@ export default function AdminLib() {
       DateOfPublish: dateOfPublish || "0000-00-00",
       Quantity: quantity,
       SSID: ssid,
-      DateModified: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      DateModified: new Date().toISOString().slice(0, 19).replace("T", " "),
     };
 
     try {
@@ -164,24 +183,28 @@ export default function AdminLib() {
     }
   };
 
-  // Handle Delete Book
+  // Handle Delete Book with headers removed for DELETE request
   const handleDeleteBook = async (catalogID) => {
     if (!window.confirm(`Are you sure you want to delete book with ID ${catalogID}?`))
       return;
-
+  
     try {
+      // Notice: We do not pass Content-Type header here.
       const response = await fetch(`http://localhost/API/Catalog.php?CatalogID=${catalogID}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        method: "DELETE"
       });
-      const result = await response.json();
+      let result = {};
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error("No JSON response on delete, status:", response.status);
+      }
+  
       if (result.success) {
-        setItems((prevItems) =>
-          prevItems.filter((item) => item.CatalogID !== catalogID)
-        );
+        setItems((prevItems) => prevItems.filter((item) => item.CatalogID !== catalogID));
         if (selectedKey === catalogID) setSelectedKey(null);
       } else {
-        console.error("Error deleting book:", result.error);
+        console.error("Error deleting book:", result.error || "Unknown error");
       }
     } catch (error) {
       console.error("Error deleting book:", error);
@@ -247,21 +270,22 @@ export default function AdminLib() {
             </Button>
           </div>
         </div>
+        {/* Search Input */}
         <div className="search-container">
           <Input
             placeholder="Search books, authors, or types..."
             startContent={<IconSearch size={20} />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="search-input"
-            onChange={(e) => {
-              // Optionally, implement client-side or debounced server search.
-              console.log("Search input:", e.target.value);
+            isClearable
+            onClear={() => {
+              setSearchQuery("");
+              fetchAllBooks();
             }}
           />
-          <Button
-            color="primary"
-            className="search-btn"
-            onPress={() => console.log("Search clicked")}
-          >
+          <Button color="primary" className="search-btn" onPress={handleSearch}>
             Search
           </Button>
         </div>
@@ -338,15 +362,11 @@ export default function AdminLib() {
                       </TableCell>
                     );
                   } else if (columnKey === "ShortDesc") {
-                    return (
-                      <TableCell>{formatShortDesc(item[columnKey])}</TableCell>
-                    );
+                    return <TableCell>{formatShortDesc(item[columnKey])}</TableCell>;
                   } else {
                     return (
                       <TableCell>
-                        {item[columnKey] !== undefined && item[columnKey] !== ""
-                          ? item[columnKey]
-                          : "N/A"}
+                        {item[columnKey] !== undefined && item[columnKey] !== "" ? item[columnKey] : "N/A"}
                       </TableCell>
                     );
                   }
@@ -358,12 +378,7 @@ export default function AdminLib() {
       </div>
 
       {/* Add/Edit Book Modal */}
-      <Modal
-        backdrop="blur"
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        size="2xl"
-      >
+      <Modal backdrop="blur" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="2xl">
         <ModalContent className="bg-gray-200 p-6 rounded-lg shadow-lg">
           <>
             <ModalHeader className="text-2xl font-semibold">
