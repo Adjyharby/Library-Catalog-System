@@ -1,12 +1,8 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./AdminLib.css";
 import {
   Button,
   Input,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   Modal,
   ModalContent,
   ModalHeader,
@@ -15,7 +11,7 @@ import {
   Autocomplete,
   AutocompleteItem,
 } from "@nextui-org/react";
-import { IconSearch, IconDotsVertical, IconTrash, IconEdit } from "@tabler/icons-react";
+import { IconSearch,  IconTrash, IconEdit } from "@tabler/icons-react";
 import {
   Table,
   TableHeader,
@@ -31,29 +27,24 @@ export default function AdminLib() {
   const [selectedKey, setSelectedKey] = useState(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Track if we're editing
+  const [isEditing, setIsEditing] = useState(false); // Track if editing
   const rowsPerPage = 6;
   const pages = Math.ceil(items.length / rowsPerPage);
 
   // Form state for Add/Edit Book modal
   const [bookName, setBookName] = useState("");
   const [authorName, setAuthorName] = useState("");
-  const [genre, setGenre] = useState("");
+  const [type, setType] = useState("");
   const [shortDesc, setShortDesc] = useState("");
   const [imageDir, setImageDir] = useState("");
   const [status, setStatus] = useState("Available");
   const [publisherName, setPublisherName] = useState("");
   const [dateOfPublish, setDateOfPublish] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [ssid, setSsid] = useState("");
   const [editCatalogID, setEditCatalogID] = useState(null); // Store the ID being edited
 
-  // Autocomplete options
-  const genreOptions = [
-    { key: "Fiction", label: "Fiction" },
-    { key: "Non-Fiction", label: "Non-Fiction" },
-    { key: "Mystery", label: "Mystery" },
-    { key: "Fantasy", label: "Fantasy" },
-    { key: "Science Fiction", label: "Science Fiction" },
-  ];
+  // Autocomplete options for Status
   const statusOptions = [
     { key: "Available", label: "Available" },
     { key: "Unavailable", label: "Unavailable" },
@@ -84,28 +75,29 @@ export default function AdminLib() {
     setSelectedKey(key);
   };
 
-  const formatGenres = (genreString) => {
-    if (!genreString) return "N/A";
-    const genres = genreString.split(/,\s*/);
-    return genres.length > 1 ? genres.join(", ") : genres[0];
+  // Function to shorten descriptions
+  const formatShortDesc = (desc) => {
+    return desc && desc.length > 50 ? desc.substring(0, 50) + "..." : desc || "N/A";
   };
 
-  // Form validation
-  const isFormValid = bookName && authorName && genre && shortDesc;
+  // Form validation: require Book Name, AuthorName, Type, and ShortDesc
+  const isFormValid = bookName && authorName && type && shortDesc;
 
   // Handle Add Book submission
   const handleAddBook = async () => {
     const newBook = {
       "Book Name": bookName,
       AuthorName: authorName,
-      Genre: genre,
+      Type: type,
       ShortDesc: shortDesc,
       ImageDir: imageDir,
       Status: status,
       PublisherName: publisherName,
       DateOfPublish: dateOfPublish || "0000-00-00",
-      Quantity: 1,
-      AdminID: 1,
+      Quantity: quantity,
+      SSID: ssid,
+      DateModified: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      // BookID and AdminID are omitted so that they remain null
     };
 
     try {
@@ -136,14 +128,15 @@ export default function AdminLib() {
       CatalogID: editCatalogID,
       "Book Name": bookName,
       AuthorName: authorName,
-      Genre: genre,
+      Type: type,
       ShortDesc: shortDesc,
       ImageDir: imageDir,
       Status: status,
       PublisherName: publisherName,
       DateOfPublish: dateOfPublish || "0000-00-00",
-      Quantity: 1,
-      AdminID: 1,
+      Quantity: quantity,
+      SSID: ssid,
+      DateModified: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
     try {
@@ -173,26 +166,25 @@ export default function AdminLib() {
 
   // Handle Delete Book
   const handleDeleteBook = async (catalogID) => {
-    if (!window.confirm(`Are you sure you want to delete book with ID ${catalogID}?`)) return;
-  
+    if (!window.confirm(`Are you sure you want to delete book with ID ${catalogID}?`))
+      return;
+
     try {
-      console.log(`Sending DELETE request for CatalogID: ${catalogID}`);
       const response = await fetch(`http://localhost/API/Catalog.php?CatalogID=${catalogID}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
       const result = await response.json();
-      console.log("Delete response:", result);
-  
       if (result.success) {
-        setItems((prevItems) => prevItems.filter((item) => item.CatalogID !== catalogID));
+        setItems((prevItems) =>
+          prevItems.filter((item) => item.CatalogID !== catalogID)
+        );
         if (selectedKey === catalogID) setSelectedKey(null);
-        console.log(`Book with CatalogID ${catalogID} deleted successfully`);
       } else {
-        console.error("Server returned error:", result.error);
+        console.error("Error deleting book:", result.error);
       }
     } catch (error) {
-      console.error("Fetch error during delete:", error);
+      console.error("Error deleting book:", error);
     }
   };
 
@@ -200,12 +192,14 @@ export default function AdminLib() {
   const resetForm = () => {
     setBookName("");
     setAuthorName("");
-    setGenre("");
+    setType("");
     setShortDesc("");
     setImageDir("");
     setStatus("Available");
     setPublisherName("");
     setDateOfPublish("");
+    setQuantity(1);
+    setSsid("");
   };
 
   // Open modal for editing
@@ -214,12 +208,14 @@ export default function AdminLib() {
     if (bookToEdit) {
       setBookName(bookToEdit["Book Name"]);
       setAuthorName(bookToEdit.AuthorName);
-      setGenre(bookToEdit.Genre);
+      setType(bookToEdit.Type);
       setShortDesc(bookToEdit.ShortDesc);
       setImageDir(bookToEdit.ImageDir || "");
       setStatus(bookToEdit.Status || "Available");
       setPublisherName(bookToEdit.PublisherName || "");
       setDateOfPublish(bookToEdit.DateOfPublish || "");
+      setQuantity(bookToEdit.Quantity || 1);
+      setSsid(bookToEdit.SSID || "");
       setEditCatalogID(catalogID);
       setIsEditing(true);
       setIsModalOpen(true);
@@ -253,9 +249,13 @@ export default function AdminLib() {
         </div>
         <div className="search-container">
           <Input
-            placeholder="Search books, authors, or genres..."
+            placeholder="Search books, authors, or types..."
             startContent={<IconSearch size={20} />}
             className="search-input"
+            onChange={(e) => {
+              // Optionally, implement client-side or debounced server search.
+              console.log("Search input:", e.target.value);
+            }}
           />
           <Button
             color="primary"
@@ -289,33 +289,18 @@ export default function AdminLib() {
           className="catalog-table"
         >
           <TableHeader>
-            <TableColumn className="table-header" key="CatalogID">
-              ID
-            </TableColumn>
-            <TableColumn className="table-header" key="Book Name">
-              TITLE
-            </TableColumn>
-            <TableColumn className="table-header" key="AuthorName">
-              AUTHOR
-            </TableColumn>
-            <TableColumn className="table-header" key="Genre">
-              GENRE
-            </TableColumn>
-            <TableColumn className="table-header" key="ShortDesc">
-              DESCRIPTION
-            </TableColumn>
-            <TableColumn className="table-header" key="Status">
-              STATUS
-            </TableColumn>
-            <TableColumn className="table-header" key="PublisherName">
-              PUBLISHER
-            </TableColumn>
-            <TableColumn className="table-header" key="DateOfPublish">
-              DATE PUBLISHED
-            </TableColumn>
-            <TableColumn className="table-header" key="options" width="50">
-              {" "}
-            </TableColumn>
+            <TableColumn key="CatalogID">ID</TableColumn>
+            <TableColumn key="Book Name">TITLE</TableColumn>
+            <TableColumn key="AuthorName">AUTHOR</TableColumn>
+            <TableColumn key="Type">TYPE</TableColumn>
+            <TableColumn key="ShortDesc">DESCRIPTION</TableColumn>
+            <TableColumn key="Status">STATUS</TableColumn>
+            <TableColumn key="Quantity">QUANTITY</TableColumn>
+            <TableColumn key="PublisherName">PUBLISHER</TableColumn>
+            <TableColumn key="DateOfPublish">DATE PUBLISHED</TableColumn>
+            <TableColumn key="SSID">SSID</TableColumn>
+            <TableColumn key="DateModified">DATE MODIFIED</TableColumn>
+            <TableColumn key="options" width="50"></TableColumn>
           </TableHeader>
           <TableBody items={paginatedItems}>
             {(item) => (
@@ -327,46 +312,45 @@ export default function AdminLib() {
                   selectedKey === item.CatalogID ? "table-row-selected" : "table-row-hover"
                 }`}
               >
-                {(columnKey) => (
-                  <TableCell className="table-cell">
-                    {columnKey === "options" ? (
-                      <Dropdown>
-                        <DropdownTrigger>
-                          <Button isIconOnly variant="light" size="sm">
-                            <IconDotsVertical size={20} />
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Book actions">
-                          <DropdownItem
-                            key="edit"
+                {(columnKey) => {
+                  if (columnKey === "options") {
+                    return (
+                      <TableCell>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <Button
+                            isIconOnly
+                            variant="light"
+                            size="sm"
                             onPress={() => openEditModal(item.CatalogID)}
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <IconEdit size={20} />
-                              Edit
-                            </div>
-                          </DropdownItem>
-                          <DropdownItem
-                            key="delete"
+                            <IconEdit size={20} />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            variant="light"
+                            size="sm"
                             color="danger"
                             onPress={() => handleDeleteBook(item.CatalogID)}
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <IconTrash size={20} />
-                              Delete
-                            </div>
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    ) : columnKey === "Genre" ? (
-                      formatGenres(item[columnKey])
-                    ) : columnKey === "ShortDesc" ? (
-                      item[columnKey]?.substring(0, 50) + "..." || "N/A"
-                    ) : (
-                      item[columnKey] || "N/A"
-                    )}
-                  </TableCell>
-                )}
+                            <IconTrash size={20} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    );
+                  } else if (columnKey === "ShortDesc") {
+                    return (
+                      <TableCell>{formatShortDesc(item[columnKey])}</TableCell>
+                    );
+                  } else {
+                    return (
+                      <TableCell>
+                        {item[columnKey] !== undefined && item[columnKey] !== ""
+                          ? item[columnKey]
+                          : "N/A"}
+                      </TableCell>
+                    );
+                  }
+                }}
               </TableRow>
             )}
           </TableBody>
@@ -374,7 +358,12 @@ export default function AdminLib() {
       </div>
 
       {/* Add/Edit Book Modal */}
-      <Modal backdrop="blur" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="2xl">
+      <Modal
+        backdrop="blur"
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="2xl"
+      >
         <ModalContent className="bg-gray-200 p-6 rounded-lg shadow-lg">
           <>
             <ModalHeader className="text-2xl font-semibold">
@@ -404,6 +393,15 @@ export default function AdminLib() {
                 <Input
                   isRequired
                   type="text"
+                  label="Type"
+                  placeholder="Enter book type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full mb-4"
+                />
+                <Input
+                  isRequired
+                  type="text"
                   label="Description"
                   placeholder="Enter short description"
                   value={shortDesc}
@@ -420,23 +418,8 @@ export default function AdminLib() {
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <Autocomplete
-                    isRequired
-                    label="Genre"
-                    placeholder="Select or type genre"
-                    value={genre}
-                    onInputChange={setGenre}
-                    defaultItems={genreOptions}
-                    allowsCustomValue={true}
-                  >
-                    {(item) => (
-                      <AutocompleteItem key={item.key} value={item.key}>
-                        {item.label}
-                      </AutocompleteItem>
-                    )}
-                  </Autocomplete>
-                  <Autocomplete
                     label="Status"
-                    placeholder="Select or type status"
+                    placeholder="Select status"
                     value={status}
                     onInputChange={setStatus}
                     defaultItems={statusOptions}
@@ -448,6 +431,13 @@ export default function AdminLib() {
                       </AutocompleteItem>
                     )}
                   </Autocomplete>
+                  <Input
+                    type="number"
+                    label="Quantity"
+                    placeholder="Enter quantity"
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <Input
@@ -465,6 +455,14 @@ export default function AdminLib() {
                     onChange={(e) => setDateOfPublish(e.target.value)}
                   />
                 </div>
+                <Input
+                  type="text"
+                  label="SSID"
+                  placeholder="Enter SSID (if applicable)"
+                  value={ssid}
+                  onChange={(e) => setSsid(e.target.value)}
+                  className="w-full mb-4"
+                />
               </div>
             </ModalBody>
             <ModalFooter className="flex justify-end space-x-3">
