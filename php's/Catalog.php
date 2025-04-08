@@ -1,14 +1,11 @@
 <?php
-
-// Set headers for CORS
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Replace with your front-end URL
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-header('Content-Type: application/json'); // Set response content type to JSON
+header('Content-Type: application/json');
 
-// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200); // Respond with 200 OK for preflight requests
+    http_response_code(200);
     exit;
 }
 
@@ -18,12 +15,9 @@ include_once './connect.php';
 if (isset($_GET['CatalogID'])) {
     $id = (int) $_GET['CatalogID'];
     $result = mysqli_query($conn, "SELECT * FROM catalog WHERE CatalogID = $id");
-
     if ($result && mysqli_num_rows($result) > 0) {
         $book = mysqli_fetch_assoc($result);
-        $book = array_map(function($value) {
-            return $value === null ? "" : $value;
-        }, $book);
+        $book = array_map(function($value) { return $value === null ? "" : $value; }, $book);
         echo json_encode($book);
     } else {
         echo json_encode(['error' => 'Book not found']);
@@ -32,49 +26,86 @@ if (isset($_GET['CatalogID'])) {
 // Fetch books by genre
 elseif (isset($_GET['genre'])) {
     $genre = mysqli_real_escape_string($conn, $_GET['genre']);
-    $genreQuery = "SELECT * FROM catalog WHERE Genre LIKE '%$genre%'";
-
+    $genreQuery = "SELECT * FROM catalog WHERE Genre LIKE '%$genre%' ORDER BY CatalogID DESC";
     $data = mysqli_query($conn, $genreQuery);
     $results = [];
-
     while ($row = mysqli_fetch_assoc($data)) {
-        $results[] = array_map(function($value) {
-            return $value === null ? "" : $value;
-        }, $row);
+        $results[] = array_map(function($value) { return $value === null ? "" : $value; }, $row);
     }
-
     echo json_encode($results);
 }
-// Fetch books based on search query (q parameter)
+// Fetch books by search query
 elseif (isset($_GET['q'])) {
     $search = mysqli_real_escape_string($conn, $_GET['q']);
     $searchQuery = "SELECT * FROM catalog 
                     WHERE `Book Name` LIKE '%$search%' 
                        OR `ShortDesc` LIKE '%$search%' 
-                       OR AuthorName LIKE '%$search%'";
-
+                       OR AuthorName LIKE '%$search%' 
+                    ORDER BY CatalogID DESC";
     $data = mysqli_query($conn, $searchQuery);
     $results = [];
-
     while ($row = mysqli_fetch_assoc($data)) {
-        $results[] = array_map(function($value) {
-            return $value === null ? "" : $value;
-        }, $row);
+        $results[] = array_map(function($value) { return $value === null ? "" : $value; }, $row);
     }
-
     echo json_encode($results);
 }
-// Fetch all catalog data
-else {
-    $data = mysqli_query($conn, "SELECT * FROM catalog");
-    $results = [];
+// Add a new book (POST)
+elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $title = mysqli_real_escape_string($conn, $data['Book Name']);
+    $author = mysqli_real_escape_string($conn, $data['AuthorName']);
+    $genre = mysqli_real_escape_string($conn, $data['Genre']);
+    $desc = mysqli_real_escape_string($conn, $data['ShortDesc']);
+    $img = mysqli_real_escape_string($conn, $data['ImageDir'] ?? '');
 
-    while ($row = mysqli_fetch_assoc($data)) {
-        $results[] = array_map(function($value) {
-            return $value === null ? "" : $value;
-        }, $row);
+    $query = "INSERT INTO catalog (`Book Name`, AuthorName, Genre, ShortDesc, ImageDir) 
+              VALUES ('$title', '$author', '$genre', '$desc', '$img')";
+    if (mysqli_query($conn, $query)) {
+        echo json_encode(['success' => true, 'CatalogID' => mysqli_insert_id($conn)]);
+    } else {
+        echo json_encode(['error' => mysqli_error($conn)]);
     }
+}
+// Update a book (PUT)
+elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $id = (int) $data['CatalogID'];
+    $title = mysqli_real_escape_string($conn, $data['Book Name']);
+    $author = mysqli_real_escape_string($conn, $data['AuthorName']);
+    $genre = mysqli_real_escape_string($conn, $data['Genre']);
+    $desc = mysqli_real_escape_string($conn, $data['ShortDesc']);
+    $img = mysqli_real_escape_string($conn, $data['ImageDir'] ?? '');
 
+    $query = "UPDATE catalog SET 
+              `Book Name` = '$title', 
+              AuthorName = '$author', 
+              Genre = '$genre', 
+              ShortDesc = '$desc', 
+              ImageDir = '$img' 
+              WHERE CatalogID = $id";
+    if (mysqli_query($conn, $query)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['error' => mysqli_error($conn)]);
+    }
+}
+// Delete a book (DELETE)
+elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $id = (int) $_GET['CatalogID'];
+    $query = "DELETE FROM catalog WHERE CatalogID = $id";
+    if (mysqli_query($conn, $query)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['error' => mysqli_error($conn)]);
+    }
+}
+// Fetch all books (sorted by CatalogID DESC)
+else {
+    $data = mysqli_query($conn, "SELECT * FROM catalog ORDER BY CatalogID DESC");
+    $results = [];
+    while ($row = mysqli_fetch_assoc($data)) {
+        $results[] = array_map(function($value) { return $value === null ? "" : $value; }, $row);
+    }
     echo json_encode($results);
 }
 
