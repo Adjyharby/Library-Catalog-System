@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 include_once './connect.php';
 
 // Fetch single book by CatalogID
-if (isset($_GET['CatalogID'])) {
+if (isset($_GET['CatalogID']) && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = (int) $_GET['CatalogID'];
     $result = mysqli_query($conn, "SELECT * FROM catalog WHERE CatalogID = $id");
     if ($result && mysqli_num_rows($result) > 0) {
@@ -34,7 +34,7 @@ elseif (isset($_GET['type'])) {
     }
     echo json_encode($results);
 }
-// Fetch books by search query
+// Fetch books by search query (searching in Book Name, ShortDesc, or AuthorName)
 elseif (isset($_GET['q'])) {
     $search = mysqli_real_escape_string($conn, $_GET['q']);
     $searchQuery = "SELECT * FROM catalog 
@@ -64,7 +64,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ssid        = mysqli_real_escape_string($conn, $data['SSID'] ?? '');
     $dateModified= mysqli_real_escape_string($conn, $data['DateModified'] ?? date('Y-m-d H:i:s'));
 
-    // BookID and AdminID remain NULL by default
     $query = "INSERT INTO catalog (`Book Name`, AuthorName, Type, ShortDesc, ImageDir, Status, PublisherName, DateOfPublish, Quantity, SSID, DateModified) 
               VALUES ('$title', '$author', '$type', '$desc', '$img', '$status', '$publisher', '$publishDate', $quantity, '$ssid', '$dateModified')";
     
@@ -111,8 +110,11 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
 }
 // Delete a book (DELETE)
-// Note: We removed the extra header from the fetch() call so that CatalogID is available via $_GET.
+// The CatalogID is expected as a query string parameter.
 elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    // Optional: uncomment the following line to log the GET parameters for debugging.
+    // file_put_contents('delete_debug.log', print_r($_GET, true));
+
     if (isset($_GET['CatalogID'])) {
         $id = (int) $_GET['CatalogID'];
         $query = "DELETE FROM catalog WHERE CatalogID = $id";
@@ -122,7 +124,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             echo json_encode(['error' => mysqli_error($conn)]);
         }
     } else {
-        echo json_encode(['error' => 'CatalogID is required']);
+        echo json_encode(['error' => 'CatalogID is required', 'debug' => $_GET]);
     }
 }
 // Fetch all books (default)

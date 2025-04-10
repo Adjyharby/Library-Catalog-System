@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 import "./AdminLib.css";
 import {
   Button,
@@ -51,13 +52,11 @@ export default function AdminLib() {
     { key: "Unavailable", label: "Unavailable" },
   ];
 
-  // Fetch all books (called on mount or when search is cleared)
+  // Function to fetch all books (when search is cleared or initial load)
   const fetchAllBooks = async () => {
     try {
-      const response = await fetch("http://localhost/API/Catalog.php");
-      if (!response.ok) throw new Error("Network response was not ok");
-      const data = await response.json();
-      setItems(data);
+      const response = await axios.get("http://localhost/API/catalog.php");
+      setItems(response.data);
     } catch (error) {
       console.error("Error fetching books:", error);
       setItems([]);
@@ -71,12 +70,10 @@ export default function AdminLib() {
       return;
     }
     try {
-      const response = await fetch(
-        `http://localhost/API/Catalog.php?q=${encodeURIComponent(searchQuery)}`
-      );
-      if (!response.ok) throw new Error("Search network response was not ok");
-      const data = await response.json();
-      setItems(data || []);
+      const response = await axios.get("http://localhost/API/catalog.php", {
+        params: { q: searchQuery },
+      });
+      setItems(response.data || []);
       setPage(1); // reset pagination
     } catch (error) {
       console.error("Error during search:", error);
@@ -120,21 +117,16 @@ export default function AdminLib() {
     };
 
     try {
-      const response = await fetch("http://localhost/API/Catalog.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBook),
-      });
-      const result = await response.json();
-      if (result.success) {
+      const response = await axios.post("http://localhost/API/catalog.php", newBook);
+      if (response.data.success) {
         setItems((prevItems) => [
-          { CatalogID: result.CatalogID, ...newBook },
+          { CatalogID: response.data.CatalogID, ...newBook },
           ...prevItems,
         ]);
         resetForm();
         setIsModalOpen(false);
       } else {
-        console.error("Error adding book:", result.error);
+        console.error("Error adding book:", response.data.error);
       }
     } catch (error) {
       console.error("Error adding book:", error);
@@ -159,13 +151,8 @@ export default function AdminLib() {
     };
 
     try {
-      const response = await fetch("http://localhost/API/Catalog.php", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedBook),
-      });
-      const result = await response.json();
-      if (result.success) {
+      const response = await axios.put("http://localhost/API/catalog.php", updatedBook);
+      if (response.data.success) {
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.CatalogID === editCatalogID ? { ...item, ...updatedBook } : item
@@ -176,38 +163,26 @@ export default function AdminLib() {
         setIsEditing(false);
         setEditCatalogID(null);
       } else {
-        console.error("Error editing book:", result.error);
+        console.error("Error editing book:", response.data.error);
       }
     } catch (error) {
       console.error("Error editing book:", error);
     }
   };
 
-  // Handle Delete Book with headers removed for DELETE request
+  // Handle Delete Book
   const handleDeleteBook = async (catalogID) => {
     if (!window.confirm(`Are you sure you want to delete book with ID ${catalogID}?`))
       return;
-  
+
     try {
-      // Notice: We do not pass Content-Type header here.
-      const response = await fetch(`http://localhost/API/Catalog.php?CatalogID=${catalogID}`, {
-        method: "DELETE"
-      });
-      let result = {};
-      try {
-        result = await response.json();
-      } catch (parseError) {
-        console.error("No JSON response on delete, status:", response.status);
-      }
-  
-      if (result.success) {
-        setItems((prevItems) => prevItems.filter((item) => item.CatalogID !== catalogID));
-        if (selectedKey === catalogID) setSelectedKey(null);
-      } else {
-        console.error("Error deleting book:", result.error || "Unknown error");
-      }
+      // Manually attach the CatalogID parameter in the URL and use a consistent endpoint name (all lowercase)
+      await axios.delete(`http://localhost/API/catalog.php?CatalogID=${catalogID}`);
+      fetchAllBooks();
+      if (selectedKey === catalogID) setSelectedKey(null);
     } catch (error) {
       console.error("Error deleting book:", error);
+      alert(error.response?.data?.error || "Unknown error");
     }
   };
 
@@ -366,7 +341,9 @@ export default function AdminLib() {
                   } else {
                     return (
                       <TableCell>
-                        {item[columnKey] !== undefined && item[columnKey] !== "" ? item[columnKey] : "N/A"}
+                        {item[columnKey] !== undefined && item[columnKey] !== ""
+                          ? item[columnKey]
+                          : "N/A"}
                       </TableCell>
                     );
                   }
