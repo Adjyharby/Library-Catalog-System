@@ -2,7 +2,7 @@
 include_once './connect.php';
 
 // Set headers for CORS
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Match frontend URL for consistency
+header("Access-Control-Allow-Origin: *"); // Match frontend URL for consistency
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
