@@ -90,7 +90,9 @@ function Help() {
             <>
               <ModalHeader>Registration Help</ModalHeader>
               <ModalBody>
-                <p>Instructions on managing your account...</p>
+                <div>
+                  <img src="public/Reg-1.png" alt="reg help pic" />
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
