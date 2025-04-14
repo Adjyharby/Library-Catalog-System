@@ -34,7 +34,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "AdminLib" ? "active" : ""} mb-6`}
         >
           <img src="/library.png" alt="Library icon" />
-          <div className="components mr-7">Library</div>
+          <div className="components mr-7">Catalog</div>
         </Button>
 
         <Button

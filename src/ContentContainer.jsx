@@ -36,6 +36,8 @@ function Main() {
         return <Accounts />;
         case "Logout":
           return <Library />;
+        case "Admin":
+          return <AdminLib />;
   
       default:
         return <Library />;

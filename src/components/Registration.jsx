@@ -187,6 +187,7 @@ function Registration() {
     { key: "Male", label: "Male" },
     { key: "Female", label: "Female" },
     { key: "LGBT+", label: "LGBT+" },
+    { key: "Rather not say", label: "Rather not say" },
   ];
 
   const yearLevelOptions = [
@@ -194,19 +195,26 @@ function Registration() {
     { key: "2nd", label: "2nd" },
     { key: "3rd", label: "3rd" },
     { key: "4th", label: "4th" },
+    { key: "PEU", label: "PEU" },
   ];
 
   const courseOptions = [
-    { key: "Infotech", label: "Infotech" },
-    { key: "Education", label: "Education" },
-    { key: "Engineering", label: "Engineering" },
-    { key: "Business", label: "Business" },
+    { key: "InfoTech", label: "InfoTech" },
+    { key: "BEED", label: "BEED" },
+    { key: "BSED", label: "BSED" },
+    { key: "Hospitality Management", label: "Hospitality Management" },
+    { key: "Tourism Management", label: "Tourism Management" },
+    { key: "IndustrialTech", label: "IndustrialTech" },
+    { key: "Agriculture", label: "Agriculture" },
   ];
 
   const purposeOptions = [
-    { key: "To read books", label: "To read books" },
-    { key: "To research", label: "To research" },
+    { key: "Read books", label: "Read books" },
+    { key: "Study", label: "Study" },
+    { key: "Leisure", label: "Leisure" },
+    { key: "Research", label: "Research" },
     { key: "Clearance", label: "Clearance" },
+    { key: "School Activity", label: "School Activity" },
   ];
 
   return (
@@ -325,6 +333,7 @@ function Registration() {
                     value={course}
                     onChange={(e) => setCourse(e.target.value)}
                     className="w-full mb-4"
+                    allowsCustomValue={true}
                   >
                     {courseOptions.map((option) => (
                       <SelectItem key={option.key} value={option.key}>

@@ -39,7 +39,6 @@ elseif (isset($_GET['q'])) {
     $search = mysqli_real_escape_string($conn, $_GET['q']);
     $searchQuery = "SELECT * FROM catalog 
                     WHERE `Book Name` LIKE '%$search%' 
-                       OR `ShortDesc` LIKE '%$search%' 
                        OR AuthorName LIKE '%$search%' 
                     ORDER BY CatalogID DESC";
     $data = mysqli_query($conn, $searchQuery);

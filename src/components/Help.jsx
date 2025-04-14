@@ -9,10 +9,10 @@ import {
 } from "@nextui-org/react";
 
 function Help() {
-  const [isRegistrationOpen, setRegistrationOpen] = useState(false);
+  // const [isRegistrationOpen, setRegistrationOpen] = useState(false);
   const [isLibraryOpen, setLibraryOpen] = useState(false);
   const [isAccountOpen, setAccountOpen] = useState(false);
-  const [isGeneralOpen, setGeneralOpen] = useState(false);
+  // const [isGeneralOpen, setGeneralOpen] = useState(false);
 
   return (
     <div>
