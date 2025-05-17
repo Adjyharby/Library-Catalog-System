@@ -42,7 +42,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "AdminReg" ? "active" : ""} mb-6`}
         >
           <img src="/registration.png" alt="Registration icon" />
-          <div className="components">Registration</div>
+          <div className="components mr-2">Registration</div>
         </Button>
 
         <Button
@@ -50,7 +50,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "Accounts" ? "active" : ""} mb-6`}
         >
           <img src="/info.png" alt="About icon" />
-          <div className="components mr-7">Accounts</div>
+          <div className="components mr-6">Accounts</div>
         </Button>
 
         <Button
@@ -58,16 +58,16 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "AdminHelp" ? "active" : ""} mb-6`}
         >
           <img src="/help.png" alt="Help icon" />
-          <div className="components mr-8">Help</div>
+          <div className="components mr-12">Help</div>
         </Button>
 
         {/* Logout*/}
         <Button
           onClick={() => handleSelectPage("Logout")}
-          className={`functions ${selectedPage === "Logout" ? "active" : ""} mb-6`}
+          className={`functions ${selectedPage === "Logout" ? "active" : ""} mb-6 `}
         >
-                    <IconUserCog size={30} color="#ffc683" />
-          Logout
+                    <IconUserCog size={30} color="#ffc683" className="mr-5"/>
+          <div className="mr-10">Logout</div>
         </Button>
 
 
