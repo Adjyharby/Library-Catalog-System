@@ -80,7 +80,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "Registration" ? "active" : ""} mb-6`}
         >
           <img src="/registration.png" alt="Registration icon" />
-          <div className="components">Registration</div>
+          <div className="components mr-2">Registration</div>
         </Button>
 
         <Button
@@ -88,7 +88,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "About" ? "active" : ""} mb-6`}
         >
           <img src="/info.png" alt="About icon" />
-          <div className="components mr-7">About</div>
+          <div className="components mr-10">About</div>
         </Button>
 
         <Button
@@ -96,7 +96,7 @@ function Sidebar({ onSelectPage }) {
           className={`functions ${selectedPage === "Help" ? "active" : ""} mb-6`}
         >
           <img src="/help.png" alt="Help icon" />
-          <div className="components mr-8">Help</div>
+          <div className="components mr-11">Help</div>
         </Button>
 
         {/* Direct admin login button */}
@@ -104,8 +104,8 @@ function Sidebar({ onSelectPage }) {
           onPress={() => setAdminLoginOpen(true)}
           className="functions mb-6"
         >
-          <IconUserCog size={30} color="#ffc683" />
-          <div className="mr-7">Admin</div>
+          <IconUserCog size={30} color="#ffc683" className="mr-5"/>
+          <div className="mr-10">Admin</div>
         </Button>
 
         {/* Admin Login Modal */}
