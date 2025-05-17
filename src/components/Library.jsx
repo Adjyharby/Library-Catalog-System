@@ -171,11 +171,11 @@ function Library() {
         <ModalContent className="bg-white shadow-lg">
           {(onClose) => (
             <>
-              <ModalHeader className="text-2xl font-semibold bg-gray-100 p-4 rounded-t-lg">
+              <ModalHeader  className="text-3xl font-semibold bg-gray-100 p-5 rounded-t-lg">
                 Search for Books
               </ModalHeader>
-              <ModalBody className="p-6">
-                <div className="flex gap-2">
+              <ModalBody>
+                <div style={{alignItems:'center'}}  className="flex gap-2">
                   <Input
                     ref={searchInputRef}
                     size="lg"
@@ -194,6 +194,7 @@ function Library() {
                     isLoading={loading}
                     size="lg"
                     className="rounded-lg"
+                    style={{marginBottom:'4.4vh'}}
                   >
                     Search
                   </Button>

@@ -12,7 +12,7 @@ function RandomNumberComponent({ onFetchBookData }) {
       // First, fetch the total number of books dynamically
       const countResponse = await fetch("http://localhost/API/CatalogCount.php");
       if (!countResponse.ok) {
-        throw new Error("Failed to fetch total book count");
+        // throw new Error("Failed to fetch total book count");
       }
       const countData = await countResponse.json();
       const totalBooks = countData.total;
@@ -57,7 +57,7 @@ function RandomNumberComponent({ onFetchBookData }) {
         });
     } catch (error) {
       console.error("Error fetching total count:", error);
-      setError("Failed to fetch total book count");
+      // setError("Failed to fetch total book count");
       setLoading(false);
     }
   };
